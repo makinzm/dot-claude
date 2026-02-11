@@ -1,0 +1,33 @@
+# 認証情報（絶対にコミットしない）
+.credentials.json
+stats-cache.json
+
+# 個人的な履歴やキャッシュ
+history.jsonl
+cache/
+paste-cache/
+statsig/
+telemetry/
+
+# セッション関連（環境依存）
+session-env/
+shell-snapshots/
+
+# 作業中のファイル
+debug/
+downloads/
+file-history/
+
+# IDE設定（必要に応じて）
+ide/
+
+# プラグイン（バイナリや環境依存の可能性）
+plugins/
+
+# プロジェクトとタスク管理
+projects/
+tasks/
+todos/
+plans/
+teams/
+
