@@ -1,1 +1,26 @@
-{}
+{
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.title + \"|\" + .message' | while IFS='|' read -r title message; do bash ~/.claude/scripts/notify.sh \"$title\" \"$message\"; done"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/scripts/notify.sh 'Claude Code' '作業が完了しました。'"
+          }
+        ]
+      }
+    ]
+  }
+}
