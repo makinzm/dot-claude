@@ -3,15 +3,19 @@
 TITLE="$1"
 MESSAGE="$2"
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    # macOS
+OS="$(uname -s 2>/dev/null)"
+
+if [[ "$OS" == "Darwin" ]]; then
+    # macOS: afplayで直接サウンド再生（tmux/devbox内でも確実に鳴る）
+    /usr/bin/afplay /System/Library/Sounds/Glass.aiff &
+
+    # 通知表示（サウンドはafplayが担当するので-soundは不要）
     if command -v terminal-notifier &> /dev/null; then
-        terminal-notifier -title "$TITLE" -message "$MESSAGE" -sound Glass
+        terminal-notifier -title "$TITLE" -message "$MESSAGE"
     else
-        osascript -e "display notification \"$MESSAGE\" with title \"$TITLE\" sound name \"Glass\""
+        /usr/bin/osascript -e "display notification \"$MESSAGE\" with title \"$TITLE\""
     fi
-elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    # Linux (Ubuntu)
+elif [[ "$OS" == "Linux" ]]; then
     if command -v notify-send &> /dev/null; then
         notify-send "$TITLE" "$MESSAGE"
     else
@@ -19,7 +23,6 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
         exit 1
     fi
 else
-    echo "Unsupported OS: $OSTYPE" >&2
+    echo "Unsupported OS: $OS" >&2
     exit 1
 fi
-EOF
