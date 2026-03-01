@@ -3,6 +3,7 @@ name: writing-code
 description: Code writing best practices and strategies for effective development
 ---
 
+0. Just use the project directory, not use the root directory even `/tmp` for writing code. This is to avoid accidentally modifying or deleting important files in the root directory. Always work within the designated project directory to keep your work organized and safe.
 1. First things first: always start with a clear plan. Write out the steps you intend to take in `tasks/YYYYMMDD-<title>/todo.md` before you write any code. This helps you stay organized and focused.
 2. Second thing: You should write tests before you write the implementation code. This test-first approach ensures that you have a clear specification to work towards and helps catch issues early.
     - Rust: Use `#[test]` functions in your modules to define tests. Run them with `cargo test`.
