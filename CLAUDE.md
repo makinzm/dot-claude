@@ -37,14 +37,8 @@
 - Proactively fix failing CI tests without being asked
 
 ### 7. Test-First Development
-- **Write the test first, watch it fail, then implement** — never write implementation code before a failing test exists
-- Treat a red test as a precise, executable specification; don't touch production code until you have one
-- Keep the feedback loop tight: fail → implement the minimum code to pass → refactor
-- One failing test at a time; resist the urge to batch multiple assertions before any pass
-- If a test passes without any implementation changes, the test is wrong — fix the test
-- Commit (or checkpoint) at each green state so regressions are immediately obvious
-- Test names should read like plain-English requirements (e.g., `test_rejects_expired_token`)
-- Mock at the boundary, not in the middle — fake external systems, not internal logic
+
+When writing code, you should check the skill about `writing-code` for best practices on how to write code effectively. Always write tests before writing the implementation code. This test-first approach ensures that you have a clear specification to work towards and helps catch issues early.
 
 ---
 
