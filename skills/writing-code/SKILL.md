@@ -9,7 +9,10 @@ description: Code writing best practices and strategies for effective developmen
     - Rust: Use `#[test]` functions in your modules to define tests. Run them with `cargo test`.
     - Python: Use `unittest` or `pytest` to write test cases. File Directory should be structured with a `tests/<module_name>/test_<file_name>.py` pattern about `src/<module_name>/<file_name>.py`. Basecally, run script with `uv run` not `python` or `python3` directly.
     - Typescript: Use `jest` or `mocha` for testing. Place tests in a `__tests__` directory or alongside the implementation files with a `.test.ts` suffix.
-3. Always verify your work before marking a task as complete. Run your tests, check logs, and ensure that your code behaves as expected. If you can prove it works, then you can confidently mark it as done.
+3. Always verify your work before marking a task as complete. Run your tests, check logs, and ensure that your code behaves as expected. And then, please meet typecheck and linting requirements. Don't just assume it works — prove it works. This is crucial for maintaining code quality and reliability.
+   - Python: Use `ty` and `ruff` for type checking and linting. Set up pre-commit hooks to run these tools automatically before commits.
+   - Rust: Use `cargo clippy` for linting and `cargo check` for type checking. Integrate these into your development workflow to catch issues early.
+   - Typescript: Use `eslint` for linting and `tsc` for type checking. Configure your IDE to run these tools on save for immediate feedback.
 4. Don't be afraid to ask yourself if there's a more elegant solution before you implement a fix. If a solution feels hacky, take a moment to think about how you can implement it in a cleaner way. However, don't over-engineer simple fixes — balance elegance with practicality.
 5. When you receive a bug report, take the initiative to fix it directly. Diagnose the issue using logs, errors, and failing tests on your own. This proactive approach minimizes context-switching for the user and helps you develop your debugging skills.
 6. Always keep a self-improvement loop. After receiving a correction, log the pattern in `tasks/lessons.md` and write rules for yourself to avoid repeating the same mistakes. Review these lessons at the start of each session to keep them fresh in your mind.
