@@ -30,9 +30,9 @@ When writing code, you should check the skill about `writing-code` for best prac
 
 ## Process Principles
 
+1. Always create a new branch if it is main. Don't work directly on main to avoid breaking the build and to keep the history clean. Use descriptive branch names that reflect the task or feature you're working on. 
 1. First thing first, you should create `tasks/YYYYMMDD-<title>/TODO.md` to write down the task details in this PR. This helps you clarify the requirements and the steps you need to take to complete the task. It also provides a reference for reviewers to understand the context of your work.
-1. Always create a new branch if it is main. Don't work directly on main to avoid breaking the build and to keep the history clean. Use descriptive branch names that reflect the task or feature you're working on.
-2. Always create log timeline for reviewer to check `tasks/YYYYMMDD-<title>/timeline.md`. This helps reviewers understand the context and the steps you took to arrive at your solution. It also provides a record of your thought process and any challenges you encountered along the way.
+1. Always create log timeline for reviewer to check `tasks/YYYYMMDD-<title>/timeline.md`. This helps reviewers understand the context and the steps you took to arrive at your solution. It also provides a record of your thought process and any challenges you encountered along the way.
 3. Always write a test code first before writing the implementation code. This test-first approach ensures that you have a clear specification to work towards and helps catch issues early. It also promotes better design and helps you think through the requirements before diving into coding. Then, you should add a error log to timeline for reviewers to check if you implement tests first and what error you encounter before writing implementation code.
 4. Write codes.
 5. Refactor and optimize your code after you have a working implementation. Don't worry about making it perfect on the first try — focus on getting something that works, then iterate to improve it. This allows you to get feedback early and make adjustments as needed without getting stuck on trying to write perfect code from the start.
