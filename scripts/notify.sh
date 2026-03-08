@@ -16,6 +16,14 @@ if [[ "$OS" == "Darwin" ]]; then
         /usr/bin/osascript -e "display notification \"$MESSAGE\" with title \"$TITLE\""
     fi
 elif [[ "$OS" == "Linux" ]]; then
+    # サウンド再生（paplay → aplay の順でフォールバック）
+    SOUND_FILE="/usr/share/sounds/freedesktop/stereo/complete.oga"
+    if command -v paplay &> /dev/null && [[ -f "$SOUND_FILE" ]]; then
+        paplay "$SOUND_FILE" &
+    elif command -v aplay &> /dev/null; then
+        aplay -q /usr/share/sounds/sound-icons/piano-3.wav 2>/dev/null &
+    fi
+
     if command -v notify-send &> /dev/null; then
         notify-send "$TITLE" "$MESSAGE"
     else
