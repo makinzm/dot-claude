@@ -4,6 +4,7 @@
       "Bash(git *)",
       "Bash(gh *)",
       "Bash(cargo *)",
+      "Bash(go *)",
       "Bash(uv *)",
       "Bash(cat *)",
       "Bash(ls *)",
