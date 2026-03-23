@@ -6,26 +6,14 @@ MESSAGE="$2"
 OS="$(uname -s 2>/dev/null)"
 
 if [[ "$OS" == "Darwin" ]]; then
-    # macOS: afplayで直接サウンド再生（tmux/devbox内でも確実に鳴る）
-    /usr/bin/afplay /System/Library/Sounds/Glass.aiff &
-
-    # 通知表示（サウンドはafplayが担当するので-soundは不要）
     if command -v terminal-notifier &> /dev/null; then
-        terminal-notifier -title "$TITLE" -message "$MESSAGE"
+        terminal-notifier -title "$TITLE" -message "$MESSAGE" -sound default
     else
-        /usr/bin/osascript -e "display notification \"$MESSAGE\" with title \"$TITLE\""
+        /usr/bin/osascript -e "display notification \"$MESSAGE\" with title \"$TITLE\" sound name \"Glass\""
     fi
 elif [[ "$OS" == "Linux" ]]; then
-    # サウンド再生（paplay → aplay の順でフォールバック）
-    SOUND_FILE="/usr/share/sounds/freedesktop/stereo/complete.oga"
-    if command -v paplay &> /dev/null && [[ -f "$SOUND_FILE" ]]; then
-        paplay "$SOUND_FILE" &
-    elif command -v aplay &> /dev/null; then
-        aplay -q /usr/share/sounds/sound-icons/piano-3.wav 2>/dev/null &
-    fi
-
     if command -v notify-send &> /dev/null; then
-        notify-send "$TITLE" "$MESSAGE"
+        notify-send "$TITLE" "$MESSAGE" --hint=string:sound-name:complete
     else
         echo "notify-send not found. Install with: sudo apt install libnotify-bin" >&2
         exit 1
