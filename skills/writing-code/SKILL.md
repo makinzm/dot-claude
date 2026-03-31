@@ -3,17 +3,17 @@ name: writing-code
 description: Code writing best practices and strategies for effective development
 ---
 
-0. Just use the project directory, not use the root directory even `/tmp` for writing code. This is to avoid accidentally modifying or deleting important files in the root directory. Always work within the designated project directory to keep your work organized and safe.
-1. First things first: always start with a clear plan. Write out the steps you intend to take in `tasks/YYYYMMDD-<title>/todo.md` before you write any code. This helps you stay organized and focused.
-2. Second thing: You should write tests before you write the implementation code. This test-first approach ensures that you have a clear specification to work towards and helps catch issues early.
-    - Rust: Use `#[test]` functions in your modules to define tests. Run them with `cargo test`.
-    - Python: Use `unittest` or `pytest` to write test cases. File Directory should be structured with a `tests/<module_name>/test_<file_name>.py` pattern about `src/<module_name>/<file_name>.py`. Basecally, run script with `uv run` not `python` or `python3` directly.
-    - Typescript: Use `jest` or `mocha` for testing. Place tests in a `__tests__` directory or alongside the implementation files with a `.test.ts` suffix.
-3. Always verify your work before marking a task as complete. Run your tests, check logs, and ensure that your code behaves as expected. And then, please meet typecheck and linting requirements. Don't just assume it works — prove it works. This is crucial for maintaining code quality and reliability.
-   - Python: Use `ty` and `ruff` for type checking and linting. Set up pre-commit hooks to run these tools automatically before commits.
-   - Rust: Use `cargo clippy` for linting and `cargo check` for type checking. Integrate these into your development workflow to catch issues early.
-   - Typescript: Use `eslint` for linting and `tsc` for type checking. Configure your IDE to run these tools on save for immediate feedback.
-4. Don't be afraid to ask yourself if there's a more elegant solution before you implement a fix. If a solution feels hacky, take a moment to think about how you can implement it in a cleaner way. However, don't over-engineer simple fixes — balance elegance with practicality.
-5. When you receive a bug report, take the initiative to fix it directly. Diagnose the issue using logs, errors, and failing tests on your own. This proactive approach minimizes context-switching for the user and helps you develop your debugging skills.
-6. Always keep a self-improvement loop. After receiving a correction, log the pattern in `tasks/lessons.md` and write rules for yourself to avoid repeating the same mistakes. Review these lessons at the start of each session to keep them fresh in your mind.
-7. Setting lefthook and CI hooks can help you maintain code quality and consistency. Use pre-commit hooks to run linters, formatters, and tests before allowing commits. This ensures that your codebase remains clean and that issues are caught early in the development process.
+0. プロジェクトディレクトリ内でのみ作業する。`/tmp` やルートディレクトリは使わない。重要なファイルを誤って変更・削除するリスクを避けるため。
+1. まず明確な計画を立てる。コードを書く前に `tasks/YYYYMMDD-<タイトル>/todo.md` に手順を書き出す。整理され集中した作業のため。
+2. 実装コードの前にテストを書く。テストファーストアプローチにより、明確な仕様に向かって作業でき、問題を早期に発見できる。
+    - Rust: モジュール内に `#[test]` 関数を定義。`cargo test` で実行。
+    - Python: `unittest` または `pytest` でテストケースを書く。ディレクトリ構造は `tests/<モジュール名>/test_<ファイル名>.py`（`src/<モジュール名>/<ファイル名>.py` に対応）。基本的に `uv run` で実行し、`python` や `python3` を直接使わない。
+    - TypeScript: `jest` または `mocha` でテスト。テストは `__tests__` ディレクトリか、実装ファイルと並べて `.test.ts` サフィックスで配置。
+3. タスク完了前に必ず検証する。テスト実行、ログ確認、期待通りの動作確認を行う。型チェックとリンティングの要件も満たすこと。「動くはず」ではなく「動くことを証明する」。
+   - Python: 型チェックに `ty`、リンティングに `ruff` を使用。pre-commitフックでコミット前に自動実行。
+   - Rust: リンティングに `cargo clippy`、型チェックに `cargo check`。開発ワークフローに組み込んで問題を早期発見。
+   - TypeScript: リンティングに `eslint`、型チェックに `tsc`。IDE設定で保存時に自動実行し即座にフィードバック。
+4. 修正を実装する前に、よりエレガントな解決策がないか自問する。ハックっぽいと感じたら、よりクリーンな実装方法を考える時間を取る。ただし、単純な修正を過剰設計しない — エレガンスと実用性のバランスを取る。
+5. バグ報告を受けたら、主体的に直接修正する。ログ、エラー、失敗テストから自分で診断する。ユーザーのコンテキストスイッチを最小限にし、デバッグスキルを磨く。
+6. 自己改善ループを維持する。修正を受けたら `tasks/lessons.md` にパターンを記録し、同じ間違いを繰り返さないルールを書く。各セッション開始時にレッスンを振り返る。
+7. lefthookとCIフックを設定してコード品質と一貫性を維持する。pre-commitフックでリンター、フォーマッター、テストをコミット前に実行し、コードベースをクリーンに保つ。

@@ -1,47 +1,118 @@
-## Workflow Design
+## ワークフロー設計
 
-### 1. Plan Mode as Default
-- Always start in Plan mode for tasks with 3+ steps or architectural decisions
-- If things go sideways, stop immediately and re-plan rather than pushing through
-- Use Plan mode not just for building, but also for validation steps
-- Write detailed specs before implementation to reduce ambiguity
+### 1. 計画モードをデフォルトに
+- 3ステップ以上のタスクやアーキテクチャ判断は、必ずPlanモードから始める
+- うまくいかなくなったら、無理に進めず即座に再計画する
+- ビルドだけでなくバリデーションにもPlanモードを活用する
+- 実装前に詳細な仕様を書いて曖昧さを減らす
 
-### 2. Self-Improvement Loop
-- After receiving a correction, always log the pattern in `tasks/lessons.md`
-- Write rules for yourself to avoid repeating the same mistakes
-- Keep refining the rules until the error rate drops
-- At the start of each session, review lessons relevant to the current project
+### 2. 計画時の疑問点Q&A
 
-### 3. Pursue Elegance (in balance)
-- Before making significant changes, pause and ask: "Is there a more elegant approach?"
-- If a fix feels hacky, think: "Given everything I now know, implement an elegant solution"
-- Skip this process for simple, obvious fixes — don't over-engineer
-- Self-critique your work before presenting it
+計画フェーズで不明点や判断に迷う点があれば、`tasks/YYYYMMDD-<タイトル>/QA.md` にやりとりを記録する。
 
-### 4. Autonomous Bug Fixing
-- When you receive a bug report, fix it directly — don't wait to be walked through it
-- Diagnose from logs, errors, and failing tests on your own
-- Zero context-switching for the user
-- Proactively fix failing CI tests without being asked
+```markdown
+## 🤔 疑問点・確認事項
 
-### 5. Test-First Development
+### Q1: <疑問の内容>
+- **背景**: なぜこの疑問が生じたか
+- **選択肢**:
+  - A: <案A> — メリット / デメリット
+  - B: <案B> — メリット / デメリット
+- **回答**: （ユーザーの回答をここに記録）
+- **決定**: （最終的な判断）
 
-When writing code, you should check the skill about `writing-code` for best practices on how to write code effectively. Always write tests before writing the implementation code. This test-first approach ensures that you have a clear specification to work towards and helps catch issues early.
+### Q2: ...
+```
 
-## Process Principles
+- 疑問が解消するまで実装に進まない
+- 回答と決定は必ず記録し、後からレビュワーが参照できるようにする
+- 判断に詰まったら人間に聞く — 勝手に決めない
 
-1. Always create a new branch if it is main. Don't work directly on main to avoid breaking the build and to keep the history clean. Use descriptive branch names that reflect the task or feature you're working on. 
-1. First thing first, you should create `tasks/YYYYMMDD-<title>/TODO.md` to write down the task details in this PR. This helps you clarify the requirements and the steps you need to take to complete the task. It also provides a reference for reviewers to understand the context of your work.
-1. Always create log timeline for reviewer to check `tasks/YYYYMMDD-<title>/timeline.md`. This helps reviewers understand the context and the steps you took to arrive at your solution. It also provides a record of your thought process and any challenges you encountered along the way.
-3. Always write a test code first before writing the implementation code. This test-first approach ensures that you have a clear specification to work towards and helps catch issues early. It also promotes better design and helps you think through the requirements before diving into coding. Then, you should add a error log to timeline for reviewers to check if you implement tests first and what error you encounter before writing implementation code.
-4. Write codes.
-5. Refactor and optimize your code after you have a working implementation. Don't worry about making it perfect on the first try — focus on getting something that works, then iterate to improve it. This allows you to get feedback early and make adjustments as needed without getting stuck on trying to write perfect code from the start.
-6. Always create a process for your tests or something similar to run automatically on CI.
+### 3. 自己改善ループ
+- 修正を受けたら、パターンを `tasks/lessons.md` に記録する
+- 同じ間違いを繰り返さないためのルールを自分で書く
+- エラー率が下がるまでルールを磨き続ける
+- 各セッション開始時に、現在のプロジェクトに関連するレッスンを振り返る
 
+### 4. エレガンスの追求（バランスを取りつつ）
+- 大きな変更の前に「もっとエレガントなアプローチはないか？」と立ち止まる
+- ハックっぽい修正なら「今の知識を総動員して、エレガントな解決策を考える」
+- 単純で明らかな修正にはこのプロセスをスキップ — 過剰設計しない
+- 提示前に自分の仕事を自己批評する
 
-## Core Principles
+### 5. 自律的バグ修正
+- バグ報告を受けたら、手順を教えてもらうのを待たず直接修正する（ただし、修正方針に複数の選択肢があり判断に迷う場合はQ&Aプロセスに従う）
+- ログ、エラー、失敗テストから自分で診断する
+- ユーザーのコンテキストスイッチをゼロにする
+- CIテストの失敗は聞かれなくても自発的に修正する
 
-- **Simplicity first**: Make every change as simple as possible. Minimize the code affected.
-- **No shortcuts**: Find the root cause. Avoid temporary fixes. Hold yourself to a senior engineer's standard.
-- **Minimize blast radius**: Change only what needs to change. Don't introduce new bugs.
+### 6. テストファースト開発
 
+コードを書くときは `writing-code` スキルのベストプラクティスを確認すること。常にテストを先に書いてから実装コードを書く。このテストファーストアプローチにより、明確な仕様に向かって作業でき、問題を早期に発見できる。
+
+---
+
+## Devil's Advocate レビューループ
+
+タスク実行時は、**実装者**と**レビュワー（Devil's Advocate）**のAgentを分離する。
+
+### ループの流れ
+
+```
+実装者Agent → 実装完了 → DAレビュワーAgent（レビュー）
+     ↑                              ↓
+     └──── 修正 ←── 指摘事項あり ←──┘
+                     指摘なし → 完了
+```
+
+### 実装者Agent の役割
+- コードの実装・テスト作成・リファクタリングを担当
+- DAからの指摘を受けて修正する
+- 修正後、再度DAにレビューを依頼する
+
+### DAレビュワーAgent の役割
+- 実装者の変更を**批判的に**レビューする
+- 以下の観点でチェック:
+  - バグや論理ミスがないか
+  - テストが十分か（エッジケース含む）
+  - セキュリティ上の問題がないか
+  - コードの可読性・保守性
+  - CLAUDE.md のプロセス原則に従っているか
+- 指摘事項を具体的に列挙する
+- 問題がなければ「LGTM」で承認する
+
+### 起動方法
+- 実装者（メインAgent or tdd-pr-workflow）が実装完了後、`da-reviewer` Agentをサブプロセスとして起動する
+- Agent ツールで `subagent_type: "da-reviewer"` を指定して呼び出す
+- tdd-pr-workflow を使う場合は、フェーズ2（TDDサイクル）完了後・フェーズ3（PR作成）前に自動的にDAレビューが挟まる
+
+### 運用ルール
+- DAは最低1回はレビューを実施する
+- DAの指摘に対して実装者が修正したら、再度DAがレビューする
+- 3往復しても収束しない場合は、人間に判断を仰ぐ
+- DAレビューの結果は `tasks/YYYYMMDD-<タイトル>/da-review.md` に記録する
+
+### DAレビュー記録フォーマット
+
+レビュー結果は `tasks/YYYYMMDD-<タイトル>/da-review.md` に記録する。
+フォーマットの詳細は `agents/da-reviewer.md` を参照。
+
+---
+
+## プロセス原則
+
+1. mainブランチでは作業しない。必ず新しいブランチを切る。ビルド破壊を防ぎ、履歴をきれいに保つため。タスクや機能を反映した分かりやすいブランチ名をつける。
+2. 最初に `tasks/YYYYMMDD-<タイトル>/TODO.md` を作成し、タスクの詳細を書き出す。要件と手順を明確にし、レビュワーがコンテキストを理解できるようにする。
+3. レビュワー用のタイムラインログを `tasks/YYYYMMDD-<タイトル>/timeline.md` に作成する。思考プロセスや遭遇した課題の記録になる。
+4. 実装コードの前に必ずテストコードを書く。テストファーストにより明確な仕様に向かって作業でき、問題を早期に発見できる。テスト実装時のエラーログをtimelineに記録し、テストファーストを実践していることを示す。
+5. コードを書く。
+6. 動く実装ができたらリファクタリングと最適化を行う。最初から完璧にしようとせず、まず動くものを作ってから改善する。
+7. テストやそれに類するプロセスがCIで自動実行されるようにする。
+
+---
+
+## コア原則
+
+- **シンプルさ最優先**: すべての変更をできるだけシンプルに。影響するコードを最小限に。
+- **近道なし**: 根本原因を見つける。一時的な修正を避ける。シニアエンジニアの基準で自分を律する。
+- **影響範囲の最小化**: 必要なところだけ変更する。新しいバグを持ち込まない。
