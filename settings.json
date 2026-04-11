@@ -1,4 +1,7 @@
 {
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
   "permissions": {
     "allow": [
       "Bash(git *)",
@@ -75,13 +78,6 @@
       "Bash(git reset --hard *)"
     ]
   },
-  "statusLine": {
-    "type": "command",
-    "command": "jq -r '\"CTX: \\(.context_window.used_percentage // 0)%\" + (if (.context_window.used_percentage // 0) >= 80 then \" (!)\" elif (.context_window.used_percentage // 0) >= 50 then \" (~)\" else \"\" end) + \" | $\\(.cost.total_cost_usd // 0 | . * 100 | round / 100)\"'"
-  },
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  },
   "hooks": {
     "Notification": [
       {
@@ -105,5 +101,15 @@
         ]
       }
     ]
-  }
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "jq -r '\"CTX: \\(.context_window.used_percentage // 0)%\" + (if (.context_window.used_percentage // 0) >= 80 then \" (!)\" elif (.context_window.used_percentage // 0) >= 50 then \" (~)\" else \"\" end) + \" | $\\(.cost.total_cost_usd // 0 | . * 100 | round / 100)\"'"
+  },
+  "voiceEnabled": true,
+  "voice": {
+    "enabled": true,
+    "mode": "hold"
+  },
+  "language": "Japanese"
 }
