@@ -107,6 +107,39 @@ Claude が作業開始
 
 ---
 
+## サウンド通知の設定
+
+タスク完了時・承認/通知イベント時に音が鳴る。以下の環境変数で制御できる。
+
+| 環境変数 | デフォルト | 説明 |
+|---|---|---|
+| `CLAUDE_SOUND` | `1` | `1` = 音あり、`0` = 無音 |
+| `CLAUDE_SOUND_STOP_NAME` | `Glass` | タスク完了時の音（Mac システムサウンド名） |
+| `CLAUDE_SOUND_NOTIFY_NAME` | `Ping` | 通知・承認イベント時の音 |
+
+**Mac システムサウンド一覧**（`/System/Library/Sounds/` にある）:
+`Glass` `Ping` `Purr` `Tink` `Hero` `Sosumi` `Basso` `Blow` `Bottle` `Frog`
+
+**設定例** (`~/.zshrc` に追記):
+
+```bash
+# Claude Code サウンドを無効化
+export CLAUDE_SOUND=0
+
+# タスク完了はHeroサウンド、通知はTinkサウンドにする
+export CLAUDE_SOUND_STOP_NAME=Hero
+export CLAUDE_SOUND_NOTIFY_NAME=Tink
+
+# カスタム音声ファイルを使う（フルパス指定可）
+export CLAUDE_SOUND_STOP_NAME=/path/to/custom.aiff
+```
+
+> `settings.json` の `env` セクションにデフォルト値が設定されている。`~/.zshrc` で上書きすると Claude Code セッションに引き継がれる。
+
+**Linux の場合**: `paplay` または `aplay` で `/usr/share/sounds/` 以下のシステムサウンドが使われる。`CLAUDE_SOUND_STOP_NAME` にフルパスを指定してカスタム音声ファイルも使用可能。
+
+---
+
 ## 監視スタック (OTel)
 
 セッション開始時に Docker Compose が自動起動する。
