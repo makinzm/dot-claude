@@ -80,6 +80,19 @@
     ]
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "async": true,
+            "command": "COMPOSE_DIR=\"$HOME/.claude/external/claude-code-monitoring-guide\"; [ -f \"$COMPOSE_DIR/docker-compose.yml\" ] && docker info >/dev/null 2>&1 && docker compose -f \"$COMPOSE_DIR/docker-compose.yml\" up -d",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
     "Notification": [
       {
         "matcher": "",
