@@ -93,6 +93,37 @@
         ]
       }
     ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/scripts/pre-task-estimate.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/scripts/loop-detection.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/scripts/tdd-guard.sh"
+          }
+        ]
+      }
+    ],
     "Notification": [
       {
         "matcher": "",
@@ -111,6 +142,11 @@
           {
             "type": "command",
             "command": "bash ~/.claude/scripts/notify.sh 'Claude Code' '作業が完了しました。'"
+          },
+          {
+            "type": "command",
+            "async": true,
+            "command": "bash ~/.claude/scripts/post-task-analysis.sh"
           }
         ]
       }
