@@ -66,6 +66,7 @@
       "ExitPlanMode",
       "EnterPlanMode",
       "NotebookEdit",
+      "ToolSearch",
       "TaskCreate",
       "TaskGet",
       "TaskList",
