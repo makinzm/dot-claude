@@ -10,6 +10,7 @@
     "allow": [
       "Bash(git *)",
       "Bash(gh *)",
+      "Bash(chezmoi *)",
       "Bash(cargo *)",
       "Bash(go *)",
       "Bash(uv *)",
@@ -73,7 +74,10 @@
       "TaskOutput",
       "CronCreate",
       "CronList",
-      "CronDelete"
+      "CronDelete",
+      "ScheduleWakeup",
+      "SendMessage",
+      "RemoteTrigger"
     ],
     "deny": [
       "Bash(rm -rf /)",
