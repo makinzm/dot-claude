@@ -1,3 +1,6 @@
 [submodule "external/claude-statusline"]
 	path = external/claude-statusline
 	url = git@github.com:makinzm/claude-statusline.git
+[submodule "external/claude-code-monitoring-guide"]
+	path = external/claude-code-monitoring-guide
+	url = git@github.com:makinzm/claude-code-monitoring-guide.git
