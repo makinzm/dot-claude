@@ -1,46 +1,66 @@
 #!/bin/bash
-# PreToolUse hook: play sound when a tool is not in the allow list (approval needed).
-# Also logs the approval event for session analysis.
-# Runs silently (exit 0 always) — never blocks tool execution.
+# PreToolUse hook: play sound only when a tool is NOT in the allow list.
+# Also logs the event for Stop hook session analysis.
+# Exit 0 always — never blocks tool execution.
 set -euo pipefail
 
 input=$(cat)
 tool_name=$(echo "$input" | jq -r '.tool_name // ""')
 session_id=$(echo "$input" | jq -r '.session_id // "default"')
 
-# Build a check string that mirrors the allow-list pattern format
+settings="$HOME/.claude/settings.json"
+[ -f "$settings" ] || exit 0
+
+# --- Allow list check (jq string match, no bash glob complexity) ---
+
+check_bash_allowed() {
+    local cmd="$1"
+    local first="${cmd%% *}"  # First word of command
+    # Matches "Bash(first *)" or "Bash(first)" in allow list
+    jq -e --arg f "$first" \
+       '[.permissions.allow[] | select(. == ("Bash(" + $f + " *)") or . == ("Bash(" + $f + ")"))] | length > 0' \
+       "$settings" > /dev/null 2>&1
+}
+
+check_tool_allowed() {
+    local tool="$1"
+    case "$tool" in
+        Read|Write|Edit|Glob|Grep)
+            # These have broad patterns like Read(/**) — just check prefix
+            jq -e --arg t "$tool" \
+               '[.permissions.allow[] | select(startswith($t + "("))] | length > 0' \
+               "$settings" > /dev/null 2>&1
+            ;;
+        *)
+            # Exact tool name match (Agent, WebSearch, TaskCreate, etc.)
+            jq -e --arg t "$tool" \
+               '[.permissions.allow[] | select(. == $t)] | length > 0' \
+               "$settings" > /dev/null 2>&1
+            ;;
+    esac
+}
+
+# --- Per-tool check ---
+
 case "$tool_name" in
     Bash)
         cmd=$(echo "$input" | jq -r '.tool_input.command // ""')
+        check_bash_allowed "$cmd" && exit 0
         check="Bash(${cmd})"
         ;;
-    Read|Write|Edit)
-        path=$(echo "$input" | jq -r '.tool_input.file_path // ""')
-        check="${tool_name}(${path})"
-        ;;
-    Glob|Grep)
-        path=$(echo "$input" | jq -r '.tool_input.pattern // .tool_input.path // ""')
+    Read|Write|Edit|Glob|Grep)
+        check_tool_allowed "$tool_name" && exit 0
+        path=$(echo "$input" | jq -r '.tool_input.file_path // .tool_input.pattern // .tool_input.path // ""')
         check="${tool_name}(${path})"
         ;;
     *)
+        check_tool_allowed "$tool_name" && exit 0
         check="$tool_name"
         ;;
 esac
 
-# Check against allow list in settings.json (glob-style matching via bash case)
-settings="$HOME/.claude/settings.json"
-[ -f "$settings" ] || exit 0
-
-while IFS= read -r pattern; do
-    # shellcheck disable=SC2254
-    case "$check" in
-        $pattern) exit 0 ;;  # Matched → auto-approved, no sound needed
-    esac
-done < <(jq -r '.permissions.allow[]' "$settings" 2>/dev/null)
-
-# Not matched → approval will be required: log and play sound
+# Not in allow list → approval will be required → log and play sound
 approval_log="/tmp/claude-approvals-${session_id}.log"
 echo "$(date +%H:%M:%S) | ${check}" >> "$approval_log"
-
 bash "$HOME/.claude/scripts/play-sound.sh" notify
 exit 0
