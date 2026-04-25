@@ -19,6 +19,16 @@ if [[ "${CLAUDE_SOUND:-1}" == "0" ]]; then
     exit 0
 fi
 
+# Debounce: skip if a sound was played within the last 2 seconds
+# (prevents double-play when both Stop and Notification hooks fire together)
+LOCK_FILE="/tmp/claude-sound-lock"
+now=$(date +%s)
+last=$(cat "$LOCK_FILE" 2>/dev/null || echo 0)
+if (( now - last < 2 )); then
+    exit 0
+fi
+echo "$now" > "$LOCK_FILE"
+
 OS="$(uname -s 2>/dev/null)"
 
 play_mac() {
