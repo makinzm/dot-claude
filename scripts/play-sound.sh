@@ -35,24 +35,21 @@ play_mac() {
     local name="$1"
     local sound_file="/System/Library/Sounds/${name}.aiff"
     if [[ -f "$sound_file" ]]; then
-        afplay "$sound_file" &>/dev/null &
+        afplay "$sound_file" 2>/dev/null
     else
-        # Fallback: treat as full path
-        afplay "$name" &>/dev/null & 2>/dev/null || true
+        afplay "$name" 2>/dev/null || true
     fi
 }
 
 play_linux() {
     local name="$1"
     if [[ -f "$name" ]]; then
-        # Full path given
         if command -v paplay &>/dev/null; then
-            paplay "$name" &>/dev/null & 2>/dev/null || true
+            paplay "$name" 2>/dev/null || true
         elif command -v aplay &>/dev/null; then
-            aplay "$name" &>/dev/null & 2>/dev/null || true
+            aplay "$name" 2>/dev/null || true
         fi
     else
-        # Try common Ubuntu sound paths
         local candidates=(
             "/usr/share/sounds/freedesktop/stereo/complete.oga"
             "/usr/share/sounds/ubuntu/stereo/desktop-login.ogg"
@@ -61,9 +58,9 @@ play_linux() {
         for f in "${candidates[@]}"; do
             if [[ -f "$f" ]]; then
                 if command -v paplay &>/dev/null; then
-                    paplay "$f" &>/dev/null & 2>/dev/null || true
+                    paplay "$f" 2>/dev/null || true
                 elif command -v aplay &>/dev/null; then
-                    aplay "$f" &>/dev/null & 2>/dev/null || true
+                    aplay "$f" 2>/dev/null || true
                 fi
                 return
             fi
