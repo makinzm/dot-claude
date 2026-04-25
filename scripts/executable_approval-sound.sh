@@ -1,10 +1,12 @@
 #!/bin/bash
 # PreToolUse hook: play sound when a tool is not in the allow list (approval needed).
+# Also logs the approval event for session analysis.
 # Runs silently (exit 0 always) — never blocks tool execution.
 set -euo pipefail
 
 input=$(cat)
 tool_name=$(echo "$input" | jq -r '.tool_name // ""')
+session_id=$(echo "$input" | jq -r '.session_id // "default"')
 
 # Build a check string that mirrors the allow-list pattern format
 case "$tool_name" in
@@ -36,6 +38,9 @@ while IFS= read -r pattern; do
     esac
 done < <(jq -r '.permissions.allow[]' "$settings" 2>/dev/null)
 
-# Not matched by any allow pattern → user approval will be required → play sound
+# Not matched → approval will be required: log and play sound
+approval_log="/tmp/claude-approvals-${session_id}.log"
+echo "$(date +%H:%M:%S) | ${check}" >> "$approval_log"
+
 bash "$HOME/.claude/scripts/play-sound.sh" notify
 exit 0
