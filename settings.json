@@ -144,12 +144,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ~/.claude/scripts/notify.sh 'Claude Code' '作業が完了しました。' stop"
+            "command": "bash ~/.claude/scripts/stop-improvement-check.sh"
           },
           {
             "type": "command",
-            "async": true,
-            "command": "bash ~/.claude/scripts/post-task-analysis.sh"
+            "command": "bash ~/.claude/scripts/notify.sh 'Claude Code' '作業が完了しました。' stop"
           }
         ]
       }
