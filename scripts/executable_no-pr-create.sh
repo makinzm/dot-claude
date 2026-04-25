@@ -1,27 +1,34 @@
 #!/bin/bash
-# PreToolUse hook: forbid `gh pr create` (and equivalents).
+# PreToolUse hook: block `gh pr create` against repos NOT owned by the user.
 #
-# Why: Opening pull requests against shared / upstream repositories is a
-# high-blast-radius action that affects other people's projects. The user
-# wants to review the branch and submit the PR by hand. Claude must hand
-# off the branch + commit messages, not pull the trigger.
+# Why: Opening a pull request against someone else's repository is a
+# high-blast-radius action that affects another project. The user reviews
+# and submits those PRs by hand. PRs against the user's own repos
+# (e.g. forks owned by ALLOWED_OWNER) are fine and stay allowed.
 #
-# Scope: blocks any `gh pr create ...` invocation, regardless of `--repo`.
-# Reading and inspecting PRs (`gh pr view`, `gh pr list`, `gh pr diff`,
-# `gh pr checks`) remains allowed because they have no side effects.
+# Decision: extract the target owner from `--repo OWNER/REPO`. If absent,
+# fall back to the `origin` remote of the current working directory. If the
+# owner equals ALLOWED_OWNER, allow; otherwise block. Unknown owner ->
+# block (fail-closed).
+#
+# Read-only PR commands (`gh pr view`, `gh pr list`, `gh pr diff`,
+# `gh pr checks`) remain allowed.
 set -euo pipefail
+
+ALLOWED_OWNER="makinzm"
 
 input=$(cat)
 tool_name=$(echo "$input" | jq -r '.tool_name // ""')
-
 if [ "$tool_name" != "Bash" ]; then
     exit 0
 fi
 
 command=$(echo "$input" | jq -r '.tool_input.command // ""')
+cwd=$(echo "$input" | jq -r '.cwd // empty')
+[ -n "$cwd" ] || cwd=$(pwd)
 
-# Strip quoted segments so a literal "gh pr create" inside a string (e.g.
-# in a commit message or comment body) does not trigger the rule.
+# Strip quoted segments so a literal `gh pr create` inside a string (commit
+# message body, etc.) does not trigger the rule.
 stripped=$(printf '%s' "$command" | python3 -c '
 import re, sys
 s = sys.stdin.read()
@@ -30,28 +37,53 @@ s = re.sub(r"\"[^\"]*\"", "", s)
 sys.stdout.write(s)
 ' 2>/dev/null || printf '%s' "$command")
 
-# Match `gh pr create` with any flags. Allow leading whitespace and other
-# wrappers like `time gh pr create`.
-if printf '%s' "$stripped" | grep -qE '(^|[[:space:]])gh[[:space:]]+pr[[:space:]]+create([[:space:]]|$)'; then
-    cat <<EOF >&2
-[no-pr-create] \`gh pr create\` is forbidden by policy.
+# Detect `gh pr create` with arbitrary leading whitespace / wrappers.
+if ! printf '%s' "$stripped" | grep -qE '(^|[[:space:]])gh[[:space:]]+pr[[:space:]]+create([[:space:]]|$)'; then
+    exit 0
+fi
 
-Why: opening a pull request against a shared / upstream repository is a
-high-blast-radius action that affects other people's projects. The human
-reviews the branch and submits the PR; Claude does not pull that trigger.
+# Extract --repo OWNER/REPO if explicitly passed (supports space or `=`).
+target_owner=""
+if printf '%s' "$stripped" | grep -qE -- '--repo([[:space:]]|=)'; then
+    target_owner=$(
+        printf '%s' "$stripped" \
+        | sed -nE 's/.*--repo[[:space:]=]+([^[:space:]]+).*/\1/p' \
+        | sed -nE 's@^([^/]+)/.*@\1@p'
+    )
+fi
 
-How to hand off:
-- Push the branch to the user's fork (this is fine).
-- Summarize the commits, the diff, and the suggested PR title / body.
-- Let the user run \`gh pr create\` (or open it via the GitHub UI) themselves.
+# Fall back to the origin remote of the current repo.
+origin_url=""
+if [ -z "$target_owner" ]; then
+    origin_url=$(git -C "$cwd" remote get-url origin 2>/dev/null || true)
+    if [ -n "$origin_url" ]; then
+        target_owner=$(
+            printf '%s' "$origin_url" \
+            | sed -nE 's@^(git@github\.com:|ssh://git@github\.com/|https://github\.com/)([^/]+)/.*$@\2@p'
+        )
+    fi
+fi
 
-If a one-off case truly requires Claude to open a PR, the user will lift
-this hook for that specific session.
+if [ "$target_owner" = "$ALLOWED_OWNER" ]; then
+    exit 0
+fi
+
+display_owner="${target_owner:-<unknown>}"
+cat <<EOF >&2
+[no-pr-create] gh pr create blocked: target owner is "${display_owner}",
+not the allowed owner "${ALLOWED_OWNER}".
+
+Why: opening a PR against someone else's repository is a high-blast-radius
+action. The user reviews and submits those PRs by hand. Forks owned by
+${ALLOWED_OWNER} are allowed automatically.
+
+How to recover:
+- If you intended to PR your own fork, pass \`--repo ${ALLOWED_OWNER}/<repo>\`
+  explicitly, or run from a clone whose \`origin\` is owned by ${ALLOWED_OWNER}.
+- For an upstream PR, hand off the branch (push + commit summary + PR
+  draft body) to the user. Do not open the PR yourself.
 
 Offending command:
 $command
 EOF
-    exit 2
-fi
-
-exit 0
+exit 2
