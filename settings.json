@@ -113,6 +113,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash ~/.claude/scripts/approval-sound.sh"
+          },
+          {
+            "type": "command",
             "command": "bash ~/.claude/scripts/loop-detection.sh"
           }
         ]
@@ -133,7 +137,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.title + \"|\" + .message' | while IFS='|' read -r title message; do bash ~/.claude/scripts/notify.sh \"$title\" \"$message\" notify; done"
+            "command": "bash ~/.claude/scripts/play-sound.sh notify"
           }
         ]
       }
