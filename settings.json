@@ -105,7 +105,8 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "jq -r '\"CTX: \\(.context_window.used_percentage // 0)%\" + (if (.context_window.used_percentage // 0) >= 80 then \" (!)\" elif (.context_window.used_percentage // 0) >= 50 then \" (~)\" else \"\" end) + \" | $\\(.cost.total_cost_usd // 0 | . * 100 | round / 100)\"'"
+    "command": "~/.claude/external/claude-statusline/bin/statusline.sh",
+    "padding": 2
   },
   "voiceEnabled": true,
   "voice": {
