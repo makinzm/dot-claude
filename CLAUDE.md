@@ -22,6 +22,48 @@
 
 ---
 
+## 改善報告の決定論的フォーマット
+
+ユーザー指摘・自発的に発見した改善を反映する際は、**以下のテンプレを毎回そのまま** 使う。同じテンプレを次の 3 箇所で統一する:
+
+1. ユーザーへのチャット応答（「改善しました」と報告するとき）
+2. Stop hook の改善マーカー (`/tmp/claude-improvements-<sid>.md`)
+3. `tasks/<task>/timeline.md` の改善ログ
+
+### テンプレ（改善 1 件あたり）
+
+```
+### 改善 #N: <1 行サマリ>
+
+- **指摘 / 動機**: <ユーザー指摘の引用 or 発見した課題の 1 文>
+- **改善の種類**: Hook / Allow / Skill / Rule / 別途調査
+- **改善先（場所）**: <絶対パス or リポジトリ相対パス。複数なら箇条書き>
+- **その場所を選んだ理由**: <改善の優先順位 (Hook > Allow > Skill > Rule) に照らした 1〜2 文>
+- **実装内容**: <1〜3 行の要点>
+- **永続化**: <commit hash / push 済 / chezmoi apply 済 / 未反映>
+```
+
+必須フィールドは **6 つ全部**。`Stop` hook の検証ロジックがマーカーを正規表現で grep し、`### 改善 #N:` ヘッダー数と各フィールド `- **<name>**:` の出現数を比較する。欠落があれば exit 2 で書き直しを要求する。
+
+### 例
+
+```
+### 改善 #1: gh pr create を makinzm 以外向けでブロック
+
+- **指摘 / 動機**: 「PR 勝手に作るな。他のリポジトリに関連するのがダメってことね」
+- **改善の種類**: Hook
+- **改善先（場所）**:
+  - `~/.local/share/chezmoi/dot_claude/scripts/executable_no-pr-create.sh`
+  - `~/.local/share/chezmoi/dot_claude/settings.json` (PreToolUse Bash matcher)
+- **その場所を選んだ理由**: 優先順位最上位の Hook で `gh pr create` を機械的にブロックすれば再発防止が確実。Rule では Claude が忘れる可能性があり、外部リポジトリへの誤投下のような high-blast-radius な事故は防げない。
+- **実装内容**: `--repo OWNER/REPO` から owner を抽出（無ければ origin URL から）し、`makinzm` 以外なら exit 2 でブロック。
+- **永続化**: commit `d5072fe` (dot_claude) / `e2313e0` (parent chezmoi)、両方 push & chezmoi apply 済。
+```
+
+「指摘ゼロ」のセッションは `### 改善 #N:` ヘッダー自体を書かず、本文に `指摘なし` と明記する（検証はスキップされる）。
+
+---
+
 ## 承認・コンテキスト削減の原則
 
 タスク実行中は常に **「この承認は次回なくせるか？」** を考える。

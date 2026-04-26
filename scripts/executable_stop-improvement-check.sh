@@ -16,6 +16,43 @@ lint_marker="/tmp/claude-lint-${session_id}"
 changed_lines=$(cat "$lines_counter" 2>/dev/null || echo 0)
 
 if [ -f "$marker" ]; then
+    # Validate marker against the required template (CLAUDE.md「改善報告の決定論的フォーマット」).
+    # Skip validation if it's a "no improvement needed" session
+    # (= no `### 改善 #N:` header at all).
+    if grep -qE '^### 改善 #[0-9]+:' "$marker"; then
+        entry_count=$(grep -cE '^### 改善 #[0-9]+:' "$marker")
+        required_fields=(
+            '指摘 / 動機'
+            '改善の種類'
+            '改善先（場所）'
+            'その場所を選んだ理由'
+            '実装内容'
+            '永続化'
+        )
+        missing=""
+        for field in "${required_fields[@]}"; do
+            field_count=$( (grep -F -- "- **${field}**:" "$marker" 2>/dev/null || true) | wc -l | tr -d ' ' )
+            field_count=${field_count:-0}
+            if [ "${field_count}" -lt "$entry_count" ]; then
+                missing="${missing}
+  - ${field} (見つかった: ${field_count}, 期待: ${entry_count})"
+            fi
+        done
+        if [ -n "$missing" ]; then
+            cat >&2 <<EOF
+【マーカー検証エラー】
+$marker の各「### 改善 #N:」ブロックで必須フィールドが不足しています:${missing}
+
+CLAUDE.md「改善報告の決定論的フォーマット」のテンプレに従って、各改善ブロックに
+以下 6 フィールドを必ず含めてください:
+$(printf -- '  - %s\n' "${required_fields[@]}")
+
+マーカーを修正してから再度終了してください。
+EOF
+            exit 2
+        fi
+    fi
+
     archive_dir="$HOME/.claude/tasks"
     mkdir -p "$archive_dir"
     cp "$marker" "$archive_dir/session-improvements-$(date +%Y%m%d-%H%M%S).md"
@@ -93,17 +130,26 @@ ${lint_section}${approval_section}
    追加前にユーザーへ「副作用 / 追加理由 / 拒否時の代替」を必ず先出しする。
 
 2. 【ユーザー指摘の棚卸し】このセッションでユーザーから受けた指摘・修正・
-   「やめて」「違う」「やり直し」「勝手に」等のフィードバックを箇条書きで
-   列挙し、それぞれの改善先（Hook / Allow / Skill / Rule / 別途調査）を決める。
-   「改善なし」「追加不要」で流すのは指摘がゼロの場合のみ。指摘があったのに
-   改善先を決めずに済ますのは禁止。
+   「やめて」「違う」「やり直し」「勝手に」等のフィードバックを列挙し、
+   それぞれを **以下のテンプレ（CLAUDE.md「改善報告の決定論的フォーマット」と
+   同一）** で書く。「指摘なし」で流すのは指摘がゼロの場合のみ。
 
-3. 上記の実施内容を以下に書いて作業を終了:
+   ━━ 改善 1 件あたりのテンプレ（必須 6 フィールド）━━
+   ### 改善 #N: <1 行サマリ>
+
+   - **指摘 / 動機**: <ユーザー指摘の引用 or 発見した課題の 1 文>
+   - **改善の種類**: Hook / Allow / Skill / Rule / 別途調査
+   - **改善先（場所）**: <絶対パス or リポジトリ相対パス。複数なら箇条書き>
+   - **その場所を選んだ理由**: <Hook > Allow > Skill > Rule の優先順位に照らした 1〜2 文>
+   - **実装内容**: <1〜3 行の要点>
+   - **永続化**: <commit hash / push 済 / chezmoi apply 済 / 未反映>
+
+   このテンプレは Stop hook 内で正規表現により検証される。
+   各「### 改善 #N:」ヘッダーに対して 6 フィールド全てが揃っていないと
+   exit 2 で書き直しを要求される。
+
+3. 上記の内容（allow 追記の有無 + 改善列挙 or「指摘なし」）を以下に書いて
+   作業を終了:
    $marker
-
-   フォーマット:
-     - allow リスト追記の有無と内容
-     - ユーザー指摘の列挙（または「指摘なし」）
-     - 各指摘の改善先（hook 化、ルール追記、調査タスク化、等）
 MSG
 exit 2
