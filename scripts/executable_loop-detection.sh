@@ -21,6 +21,12 @@ if [ "$tool_name" = "Bash" ]; then
         touch "/tmp/claude-tdd-${session_id}" 2>/dev/null || true
     fi
 
+    # Mark lint / formatter runs for stop-improvement-check
+    if echo "$command" | grep -qiE \
+        '(cargo clippy|cargo fmt|ruff[[:space:]]+(check|format)|eslint|pyright|mypy|biome[[:space:]]+(check|lint|format)|prettier[[:space:]]+--check|golangci-lint|gofmt|tsc(\b|[[:space:]])|rubocop|stylua|shellcheck|markdownlint)'; then
+        touch "/tmp/claude-lint-${session_id}" 2>/dev/null || true
+    fi
+
     # Use first 120 chars as key to normalize slight variations
     key=$(echo "$command" | head -c 120 | tr -s '[:space:]' ' ')
     cmd_file="${counter_file}-cmds"

@@ -163,6 +163,18 @@ allow リストへ項目を追加する前に、ユーザーへ以下を **必�
 6. 動く実装ができたらリファクタリングと最適化を行う。最初から完璧にしようとせず、まず動くものを作ってから改善する。
 7. テストやそれに類するプロセスがCIで自動実行されるようにする。
 
+### 実装完了 → DA レビュー前のチェックリスト
+
+実装ファイルに変更を加えた場合、DA レビューに渡す前に以下を **必ず** 実行し、結果を `tasks/YYYYMMDD-<タイトル>/timeline.md` に貼る:
+
+1. **テスト**: 言語別 — `cargo test` / `pytest` / `npm test` / `go test` / 等
+2. **lint**: 言語別 — `cargo clippy --tests -- -D warnings` / `ruff check` / `eslint` / `mypy` / `pyright` / 等
+3. **フォーマット**: 言語別 — `cargo fmt --check` / `ruff format --check` / `prettier --check` / 等
+
+3 つすべて clean になるまで DA レビューに進まない。clean でないままレビュー依頼するのは禁止。
+
+`Stop` フックは「実装変更あり（10 行以上）かつ lint 系コマンドの実行ログなし」を検出すると `⚠ lint / formatter 未実行` と警告する。警告が出たまま完了させない。
+
 ---
 
 ## エージェントとスキルの活用

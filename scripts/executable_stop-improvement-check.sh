@@ -11,6 +11,7 @@ transcript_path=$(echo "$input" | jq -r '.transcript_path // ""')
 marker="/tmp/claude-improvements-${session_id}.md"
 approval_log="/tmp/claude-approvals-${session_id}.log"
 lines_counter="/tmp/claude-lines-${session_id}"
+lint_marker="/tmp/claude-lint-${session_id}"
 
 changed_lines=$(cat "$lines_counter" 2>/dev/null || echo 0)
 
@@ -18,7 +19,7 @@ if [ -f "$marker" ]; then
     archive_dir="$HOME/.claude/tasks"
     mkdir -p "$archive_dir"
     cp "$marker" "$archive_dir/session-improvements-$(date +%Y%m%d-%H%M%S).md"
-    rm -f "$marker" "$approval_log" "$lines_counter"
+    rm -f "$marker" "$approval_log" "$lines_counter" "$lint_marker"
     exit 0
 fi
 
@@ -42,6 +43,21 @@ if [ "${changed_lines}" -ge 50 ]; then
     force_check=1
 fi
 
+# Build lint warning section: implementation changes without lint run is suspicious.
+lint_section=""
+if [ ! -f "$lint_marker" ]; then
+    # No lint detected this session.
+    if [ "${changed_lines}" -ge 10 ]; then
+        lint_section="
+━━ ⚠ lint / formatter 未実行 ━━
+このセッションで ${changed_lines} 行の変更が記録されていますが、
+cargo clippy / cargo fmt --check / ruff / eslint / mypy / pyright / 等の
+lint 系コマンドの実行ログがありません。
+完了前に必ず lint と formatter を実行し、その出力を timeline に貼ってください。
+"
+    fi
+fi
+
 # Build approval section from log
 approval_section=""
 if [ -f "$approval_log" ] && [ -s "$approval_log" ]; then
@@ -51,13 +67,13 @@ if [ -f "$approval_log" ] && [ -s "$approval_log" ]; then
 $(cat "$approval_log")
 "
 else
-    if [ "$force_check" -eq 0 ]; then
-        # No approvals and not a large implementation → skip
+    if [ "$force_check" -eq 0 ] && [ -z "$lint_section" ]; then
+        # No approvals, not a large implementation, lint OK → skip
         archive_dir="$HOME/.claude/tasks"
         mkdir -p "$archive_dir"
         echo "改善なし（このセッションで allow リスト外のツール使用なし）" > \
             "$archive_dir/session-improvements-$(date +%Y%m%d-%H%M%S).md"
-        rm -f "$approval_log" "$lines_counter"
+        rm -f "$approval_log" "$lines_counter" "$lint_marker"
         exit 0
     fi
     approval_section="
@@ -68,7 +84,7 @@ fi
 cat >&2 <<MSG
 【セッション改善チェック】終了前に以下を実行してください。
 変更行数: ${changed_lines}行
-${approval_section}
+${lint_section}${approval_section}
 実行すべきこと:
 
 1. 【allow リスト更新】上記のうち安全に自動承認できるパターンを
