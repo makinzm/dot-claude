@@ -15,11 +15,24 @@ settings="$HOME/.claude/settings.json"
 
 check_bash_allowed() {
     local cmd="$1"
-    local first="${cmd%% *}"  # First word of command
-    # Matches "Bash(first *)" or "Bash(first)" in allow list
-    jq -e --arg f "$first" \
-       '[.permissions.allow[] | select(. == ("Bash(" + $f + " *)") or . == ("Bash(" + $f + ")"))] | length > 0' \
-       "$settings" > /dev/null 2>&1
+    # Match against any "Bash(prefix *)" or "Bash(exact)" entry, supporting
+    # multi-word prefixes like "Bash(gcloud secrets versions access *)".
+    while IFS= read -r entry; do
+        # Strip "Bash(" prefix and ")" suffix to get the inner pattern
+        local pattern="${entry#Bash(}"
+        pattern="${pattern%)}"
+        if [[ "$pattern" == *" *" ]]; then
+            local prefix="${pattern% \*}"
+            if [ "$cmd" = "$prefix" ] || [[ "$cmd" == "$prefix "* ]]; then
+                return 0
+            fi
+        else
+            if [ "$cmd" = "$pattern" ]; then
+                return 0
+            fi
+        fi
+    done < <(jq -r '.permissions.allow[] | select(startswith("Bash("))' "$settings" 2>/dev/null)
+    return 1
 }
 
 check_tool_allowed() {

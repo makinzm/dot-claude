@@ -16,6 +16,18 @@ if [ "$tool_name" != "Write" ] && [ "$tool_name" != "Edit" ] && [ "$tool_name" !
     exit 0
 fi
 
+# Accumulate changed-lines counter for stop-improvement-check
+lines_counter="/tmp/claude-lines-${session_id}"
+if [ "$tool_name" = "Write" ]; then
+    new_lines=$(echo "$input" | jq -r '.tool_input.content // ""' | wc -l | tr -d ' ')
+elif [ "$tool_name" = "Edit" ]; then
+    new_lines=$(echo "$input" | jq -r '.tool_input.new_string // ""' | wc -l | tr -d ' ')
+else
+    new_lines=0
+fi
+current=$(cat "$lines_counter" 2>/dev/null || echo 0)
+echo $((current + new_lines)) > "$lines_counter"
+
 # Determine target file path
 if [ "$tool_name" = "apply_patch" ]; then
     # Extract first modified file path from patch headers (+++ b/path)
