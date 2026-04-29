@@ -118,10 +118,45 @@ else
 "
 fi
 
+# Check for uncommitted/unpushed changes in dot_claude submodule
+dot_claude_section=""
+dot_claude_dir="$HOME/.local/share/chezmoi/dot_claude"
+if [ -d "$dot_claude_dir/.git" ] || [ -f "$dot_claude_dir/.git" ]; then
+    dirty=""
+    if [ -n "$(git -C "$dot_claude_dir" status --porcelain 2>/dev/null)" ]; then
+        dirty="未コミットの変更があります"
+    fi
+    unpushed=""
+    local_head=$(git -C "$dot_claude_dir" rev-parse HEAD 2>/dev/null || true)
+    remote_head=$(git -C "$dot_claude_dir" rev-parse origin/main 2>/dev/null || true)
+    if [ -n "$local_head" ] && [ -n "$remote_head" ] && [ "$local_head" != "$remote_head" ]; then
+        unpushed="未 push のコミットがあります"
+    fi
+    # Also check parent repo for submodule ref update
+    parent_dirty=""
+    parent_dir="$HOME/.local/share/chezmoi"
+    if [ -n "$(git -C "$parent_dir" diff --name-only -- dot_claude 2>/dev/null)" ]; then
+        parent_dirty="親リポジトリで dot_claude のサブモジュール参照が未コミットです"
+    fi
+    if [ -n "$dirty" ] || [ -n "$unpushed" ] || [ -n "$parent_dirty" ]; then
+        dot_claude_section="
+━━ ⚠ dot_claude 未永続化 ━━"
+        [ -n "$dirty" ] && dot_claude_section="${dot_claude_section}
+  - ${dirty}"
+        [ -n "$unpushed" ] && dot_claude_section="${dot_claude_section}
+  - ${unpushed}"
+        [ -n "$parent_dirty" ] && dot_claude_section="${dot_claude_section}
+  - ${parent_dirty}"
+        dot_claude_section="${dot_claude_section}
+dot_claude 内で commit → push し、親リポジトリでも dot_claude を add → commit → push してください。
+"
+    fi
+fi
+
 cat >&2 <<MSG
 【セッション改善チェック】終了前に以下を実行してください。
 変更行数: ${changed_lines}行
-${lint_section}${approval_section}
+${lint_section}${dot_claude_section}${approval_section}
 実行すべきこと:
 
 1. 【allow リスト更新】上記のうち安全に自動承認できるパターンを
