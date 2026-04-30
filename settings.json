@@ -12,6 +12,8 @@
       "Bash(gh *)",
       "Bash(chezmoi *)",
       "Bash(cargo *)",
+      "Bash(SQLX_OFFLINE=* cargo *)",
+      "Bash(SQLX_OFFLINE=* mille *)",
       "Bash(go *)",
       "Bash(uv *)",
       "Bash(cat *)",
@@ -51,6 +53,7 @@
       "Bash(realpath *)",
       "Bash(dirname *)",
       "Bash(basename *)",
+      "Bash(rm /tmp/*)",
       "Bash(test *)",
       "Bash(true)",
       "Bash(false)",
@@ -172,17 +175,7 @@
         ]
       }
     ],
-    "Notification": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/scripts/play-sound.sh notify"
-          }
-        ]
-      }
-    ],
+    "Notification": [],
     "Stop": [
       {
         "matcher": "",
