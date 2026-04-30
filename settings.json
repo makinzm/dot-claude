@@ -14,6 +14,7 @@
       "Bash(cargo *)",
       "Bash(SQLX_OFFLINE=* cargo *)",
       "Bash(SQLX_OFFLINE=* mille *)",
+      "Bash(DATABASE_URL=* cargo *)",
       "Bash(go *)",
       "Bash(uv *)",
       "Bash(cat *)",
