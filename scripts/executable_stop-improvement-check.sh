@@ -53,6 +53,37 @@ EOF
         fi
     fi
 
+    # Block if dot_claude has uncommitted or unpushed changes
+    dot_claude_dir="$HOME/.local/share/chezmoi/dot_claude"
+    if [ -d "$dot_claude_dir/.git" ] || [ -f "$dot_claude_dir/.git" ]; then
+        block_reasons=""
+        if [ -n "$(git -C "$dot_claude_dir" status --porcelain 2>/dev/null)" ]; then
+            block_reasons="${block_reasons}  - dot_claude に未コミットの変更があります\n"
+        fi
+        dc_local=$(git -C "$dot_claude_dir" rev-parse HEAD 2>/dev/null || true)
+        dc_remote=$(git -C "$dot_claude_dir" rev-parse origin/main 2>/dev/null || true)
+        if [ -n "$dc_local" ] && [ -n "$dc_remote" ] && [ "$dc_local" != "$dc_remote" ]; then
+            block_reasons="${block_reasons}  - dot_claude に未 push のコミットがあります\n"
+        fi
+        parent_dir="$HOME/.local/share/chezmoi"
+        if [ -n "$(git -C "$parent_dir" diff --name-only -- dot_claude 2>/dev/null)" ]; then
+            block_reasons="${block_reasons}  - 親 chezmoi リポジトリで dot_claude サブモジュール参照が未コミットです\n"
+        fi
+        if [ -n "$block_reasons" ]; then
+            printf >&2 '【dot_claude 永続化ブロック】\n'
+            printf >&2 'dot_claude を編集しましたが、永続化が完了していません:\n'
+            printf >&2 '%b\n' "$block_reasons"
+            printf >&2 '以下を実行してください:\n'
+            printf >&2 '  1. git -C ~/.local/share/chezmoi/dot_claude add -A\n'
+            printf >&2 '  2. git -C ~/.local/share/chezmoi/dot_claude commit -m "..."\n'
+            printf >&2 '  3. git -C ~/.local/share/chezmoi/dot_claude push\n'
+            printf >&2 '  4. git -C ~/.local/share/chezmoi add dot_claude\n'
+            printf >&2 '  5. git -C ~/.local/share/chezmoi commit -m "chore: update dot_claude submodule"\n'
+            printf >&2 '  6. git -C ~/.local/share/chezmoi push\n'
+            exit 2
+        fi
+    fi
+
     archive_dir="$HOME/.claude/tasks"
     mkdir -p "$archive_dir"
     cp "$marker" "$archive_dir/session-improvements-$(date +%Y%m%d-%H%M%S).md"
