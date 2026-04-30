@@ -2,7 +2,7 @@
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "EDITOR": "code",
-    "CLAUDE_SOUND": "1",
+    "CLAUDE_SOUND": "0",
     "CLAUDE_SOUND_STOP_NAME": "Glass",
     "CLAUDE_SOUND_NOTIFY_NAME": "Ping"
   },
