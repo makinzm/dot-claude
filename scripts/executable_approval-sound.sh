@@ -15,21 +15,17 @@ settings="$HOME/.claude/settings.json"
 
 check_bash_allowed() {
     local cmd="$1"
-    # Match against any "Bash(prefix *)" or "Bash(exact)" entry, supporting
-    # multi-word prefixes like "Bash(gcloud secrets versions access *)".
+    # Match against allow list patterns using bash glob matching.
+    # Supports patterns like "Bash(cargo *)", "Bash(SQLX_OFFLINE=* cargo *)",
+    # and exact matches like "Bash(pwd)".
+    # Each '*' in the pattern matches any sequence of characters (bash glob).
     while IFS= read -r entry; do
-        # Strip "Bash(" prefix and ")" suffix to get the inner pattern
         local pattern="${entry#Bash(}"
         pattern="${pattern%)}"
-        if [[ "$pattern" == *" *" ]]; then
-            local prefix="${pattern% \*}"
-            if [ "$cmd" = "$prefix" ] || [[ "$cmd" == "$prefix "* ]]; then
-                return 0
-            fi
-        else
-            if [ "$cmd" = "$pattern" ]; then
-                return 0
-            fi
+        # Use bash [[ == ]] glob matching which handles * anywhere in pattern
+        # shellcheck disable=SC2053
+        if [[ "$cmd" == $pattern ]]; then
+            return 0
         fi
     done < <(jq -r '.permissions.allow[] | select(startswith("Bash("))' "$settings" 2>/dev/null)
     return 1
@@ -72,8 +68,10 @@ case "$tool_name" in
         ;;
 esac
 
-# Not in allow list → approval will be required → log and play sound
+# Not in allow list → likely requires approval → log only (no sound).
+# Sound was removed because PreToolUse cannot reliably determine if Claude Code
+# will actually prompt for approval. False positives caused unwanted noise.
+# Approval sound is left to the terminal/OS level. Completion sound is in Stop hook.
 approval_log="/tmp/claude-approvals-${session_id}.log"
 echo "$(date +%H:%M:%S) | ${check}" >> "$approval_log"
-bash "$HOME/.claude/scripts/play-sound.sh" notify
 exit 0
