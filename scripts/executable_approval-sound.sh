@@ -68,10 +68,8 @@ case "$tool_name" in
         ;;
 esac
 
-# Not in allow list → likely requires approval → log only (no sound).
-# Sound was removed because PreToolUse cannot reliably determine if Claude Code
-# will actually prompt for approval. False positives caused unwanted noise.
-# Approval sound is left to the terminal/OS level. Completion sound is in Stop hook.
+# Not in allow list → likely requires approval → log only.
+# Sound is handled by the Notification hook (fires when actually waiting for user).
 approval_log="/tmp/claude-approvals-${session_id}.log"
 echo "$(date +%H:%M:%S) | ${check}" >> "$approval_log"
 exit 0
