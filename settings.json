@@ -12,10 +12,6 @@
       "Bash(gh *)",
       "Bash(chezmoi *)",
       "Bash(cargo *)",
-      "Bash(SQLX_OFFLINE=* cargo *)",
-      "Bash(SQLX_OFFLINE=* mille *)",
-      "Bash(mille *)",
-      "Bash(DATABASE_URL=* cargo *)",
       "Bash(go *)",
       "Bash(uv *)",
       "Bash(cat *)",
@@ -55,7 +51,6 @@
       "Bash(realpath *)",
       "Bash(dirname *)",
       "Bash(basename *)",
-      "Bash(rm /tmp/*)",
       "Bash(test *)",
       "Bash(true)",
       "Bash(false)",
@@ -113,9 +108,9 @@
         "hooks": [
           {
             "type": "command",
-            "async": true,
             "command": "COMPOSE_DIR=\"$HOME/.claude/external/claude-code-monitoring-guide\"; [ -f \"$COMPOSE_DIR/docker-compose.yml\" ] && docker info >/dev/null 2>&1 && docker compose -f \"$COMPOSE_DIR/docker-compose.yml\" up -d",
-            "timeout": 60
+            "timeout": 60,
+            "async": true
           }
         ]
       }
@@ -142,15 +137,6 @@
           {
             "type": "command",
             "command": "bash ~/.claude/scripts/loop-detection.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "Read|Edit|Write|Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/scripts/no-env-read.sh"
           }
         ]
       },
@@ -209,10 +195,10 @@
     "command": "~/.claude/external/claude-statusline/bin/statusline.sh",
     "padding": 2
   },
-  "voiceEnabled": true,
+  "language": "English",
   "voice": {
     "enabled": true,
     "mode": "hold"
   },
-  "language": "Japanese"
+  "voiceEnabled": true
 }
