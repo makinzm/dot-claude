@@ -45,9 +45,10 @@ if [ "$tool_name" = "Bash" ]; then
     fi
 fi
 
-# Total tool call count guard: if >40 calls without user reset, warn
+# Total tool call count guard: if >150 calls without user reset, warn
+# 40 was too low for multi-step BACKLOG task sequences (TDD RED→GREEN→lint→commit etc.)
 total=$(wc -l < "$counter_file" 2>/dev/null || echo 0)
-if [ "${total:-0}" -ge 40 ]; then
+if [ "${total:-0}" -ge 150 ]; then
     echo "長時間ループ検出: ユーザー入力なしに${total}回のツール呼び出しが発生しています。" >&2
     echo "作業の進捗と課題をユーザーに報告し、続行の確認を取ってください。" >&2
     # Reset counter to avoid spamming every subsequent call
