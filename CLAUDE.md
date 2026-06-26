@@ -7,6 +7,12 @@
 - `~/.claude/` 配下の直接編集は chezmoi の管理と乖離し、`chezmoi apply` で上書きされる
 - ランタイムデータ（ログ・セッション分析結果）は `~/.claude/tasks/` に書いてよい（chezmoi 管理外）
 
+**`~/.local/share/chezmoi/dot_claude/` の変更は事前確認なしで即実施してよい。**
+
+- ユーザーは chezmoi / dot_claude 配下の編集を事前に許可している
+- `allow リスト追加時のルール`（副作用先出し）は dot_claude 変更には適用しない
+- chezmoi apply と push まで一連でやりきる
+
 ---
 
 ## 改善の優先順位
