@@ -25,6 +25,7 @@
       "Bash(mv *)",
       "Bash(rm *)",
       "Bash(touch *)",
+      "Bash(chmod +x *)",
       "Bash(zip *)",
       "Bash(unzip *)",
       "Bash(pwd)",
