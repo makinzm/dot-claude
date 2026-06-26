@@ -23,6 +23,7 @@
       "Bash(mkdir *)",
       "Bash(cp *)",
       "Bash(mv *)",
+      "Bash(rm *)",
       "Bash(pwd)",
       "Bash(cd *)",
       "Bash(npm *)",
