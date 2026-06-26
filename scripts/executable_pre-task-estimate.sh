@@ -9,6 +9,21 @@ prompt=$(echo "$input" | jq -r '.prompt // ""')
 # Reset loop counter and TDD marker on new user input
 rm -f "/tmp/claude-loop-${session_id}" "/tmp/claude-loop-${session_id}-cmds" "/tmp/claude-tdd-${session_id}" 2>/dev/null
 
+# Inject BACKLOG.md once per session (docs/tasks/BACKLOG.md or BACKLOG.md)
+backlog_marker="/tmp/claude-backlog-injected-${session_id}"
+if [ ! -f "$backlog_marker" ]; then
+    backlog_file=""
+    [ -f "docs/tasks/BACKLOG.md" ] && backlog_file="docs/tasks/BACKLOG.md"
+    [ -z "$backlog_file" ] && [ -f "BACKLOG.md" ] && backlog_file="BACKLOG.md"
+    if [ -n "$backlog_file" ]; then
+        touch "$backlog_marker"
+        echo "---"
+        echo "[バックログ自動注入: $backlog_file]"
+        cat "$backlog_file"
+        echo "---"
+    fi
+fi
+
 word_count=$(echo "$prompt" | wc -w | tr -d ' ')
 
 # Heuristics for architectural/complex keywords
