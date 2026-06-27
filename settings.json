@@ -42,6 +42,7 @@
       "Bash(bun *)",
       "Bash(deno *)",
       "Bash(docker *)",
+      "Bash(lefthook *)",
       "Bash(make *)",
       "Bash(jq *)",
       "Bash(wc *)",
