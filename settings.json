@@ -53,6 +53,7 @@
       "Bash(lefthook *)",
       "Bash(make *)",
       "Bash(jq *)",
+      "Bash(du *)",
       "Bash(wc *)",
       "Bash(sort *)",
       "Bash(grep *)",
