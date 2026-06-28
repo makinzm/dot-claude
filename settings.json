@@ -29,6 +29,8 @@
       "Bash(zip *)",
       "Bash(unzip *)",
       "Bash(ps *)",
+      "Bash(bash -n *)",
+      "Bash(shellcheck *)",
       "Bash(pwd)",
       "Bash(cd *)",
       "Bash(npm *)",
