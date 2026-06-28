@@ -35,6 +35,7 @@
       "Bash(kill *)",
       "Bash(shellcheck *)",
       "Bash(date)",
+      "Bash(sleep *)",
       "Bash(pwd)",
       "Bash(cd *)",
       "Bash(npm *)",
