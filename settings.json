@@ -28,6 +28,7 @@
       "Bash(chmod +x *)",
       "Bash(zip *)",
       "Bash(unzip *)",
+      "Bash(ps *)",
       "Bash(pwd)",
       "Bash(cd *)",
       "Bash(npm *)",
