@@ -119,6 +119,7 @@
       "Bash(git reset --hard *)"
     ]
   },
+  "model": "claude-sonnet-5",
   "hooks": {
     "SessionStart": [
       {
@@ -168,6 +169,10 @@
           {
             "type": "command",
             "command": "bash ~/.claude/scripts/no-pr-create.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash ~/.claude/scripts/prefer-uv.sh"
           }
         ]
       },
