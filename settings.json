@@ -14,6 +14,7 @@
       "Bash(cargo *)",
       "Bash(go *)",
       "Bash(uv *)",
+      "Bash(curl -sSL -o models/*.task \"https://storage.googleapis.com/mediapipe-models/*\")",
       "Bash(cat *)",
       "Bash(ls *)",
       "Bash(head *)",
