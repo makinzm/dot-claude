@@ -20,6 +20,7 @@
       "Bash(head *)",
       "Bash(tail *)",
       "Bash(which *)",
+      "Bash(command -v *)",
       "Bash(echo *)",
       "Bash(mkdir *)",
       "Bash(cp *)",
