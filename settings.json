@@ -39,6 +39,7 @@
       "Bash(nohup *)",
       "Bash(kill *)",
       "Bash(shellcheck *)",
+      "Bash(actionlint *)",
       "Bash(date)",
       "Bash(sleep *)",
       "Bash(pwd)",
@@ -228,5 +229,6 @@
     "enabled": true,
     "mode": "hold"
   },
-  "voiceEnabled": true
+  "voiceEnabled": true,
+  "agentPushNotifEnabled": true
 }
