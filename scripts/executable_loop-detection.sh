@@ -27,8 +27,12 @@ if [ "$tool_name" = "Bash" ]; then
         touch "/tmp/claude-lint-${session_id}" 2>/dev/null || true
     fi
 
-    # Use first 120 chars as key to normalize slight variations
-    key=$(echo "$command" | head -c 120 | tr -s '[:space:]' ' ')
+    # Use the whole command (whitespace-normalized) as the key. Truncating to
+    # a fixed prefix (previously 120 chars) false-positived whenever multiple
+    # distinct commands shared a long common prefix, e.g. the same long
+    # scratch-directory path assigned to a variable at the start of several
+    # otherwise-different commands.
+    key=$(echo "$command" | tr -s '[:space:]' ' ')
     cmd_file="${counter_file}-cmds"
     echo "$key" >> "$cmd_file"
 
