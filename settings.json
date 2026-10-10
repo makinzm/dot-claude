@@ -177,6 +177,10 @@
           {
             "type": "command",
             "command": "bash ~/.claude/scripts/prefer-uv.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash ~/.claude/scripts/agents-qa-complete-check.sh"
           }
         ]
       },
@@ -186,6 +190,10 @@
           {
             "type": "command",
             "command": "bash ~/.claude/scripts/tdd-guard.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash ~/.claude/scripts/agents-workflow-guard.sh"
           }
         ]
       }
