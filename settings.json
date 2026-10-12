@@ -115,6 +115,7 @@
       "CronDelete",
       "ScheduleWakeup",
       "SendMessage",
+      "ListAgents",
       "RemoteTrigger"
     ],
     "deny": [
