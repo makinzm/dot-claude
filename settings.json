@@ -41,6 +41,7 @@
       "Bash(shellcheck *)",
       "Bash(actionlint *)",
       "Bash(date)",
+      "Bash(date *)",
       "Bash(sleep *)",
       "Bash(pwd)",
       "Bash(cd *)",
