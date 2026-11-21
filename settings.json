@@ -18,6 +18,8 @@
       "Bash(curl * 127.0.0.1*)",
       "Bash(curl * localhost*)",
       "Bash(lsof -nP -iTCP* -sTCP:LISTEN*)",
+      "Bash(lsof *)",
+      "Bash(pgrep *)",
       "Bash(cat *)",
       "Bash(ls *)",
       "Bash(head *)",
