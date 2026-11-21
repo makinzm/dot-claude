@@ -203,7 +203,7 @@
     ],
     "Notification": [
       {
-        "matcher": "",
+        "matcher": "permission_prompt|idle_prompt|elicitation_dialog|elicitation_url_dialog|agent_needs_input",
         "hooks": [
           {
             "type": "command",
@@ -222,7 +222,7 @@
           },
           {
             "type": "command",
-            "command": "bash ~/.claude/scripts/notify.sh 'Claude Code' '作業が完了しました。' stop"
+            "command": "bash ~/.claude/scripts/stop-notify.sh"
           }
         ]
       }
