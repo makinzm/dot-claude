@@ -90,6 +90,7 @@
       "Bash(gcloud config get-value *)",
       "Bash(gcloud iam service-accounts list *)",
       "Bash(gcloud iam service-accounts describe *)",
+      "Bash(printf * >> /Users/hope/.claude/agent-memory/da-reviewer/*.md)",
       "Read(~/.local/share/chezmoi/dot_claude/**)",
       "Edit(~/.local/share/chezmoi/dot_claude/**)",
       "Read(/**)",
