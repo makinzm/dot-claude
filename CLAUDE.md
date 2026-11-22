@@ -371,7 +371,7 @@ allow リストへ項目を追加する前に、ユーザーへ以下を **必�
 | `UserPromptSubmit` | ユーザー入力時 | 難易度推定(S/M/L/XL)、L/XL時は状態ファイル作成 |
 | `PreToolUse` (全) | ツール実行前 | 承認音（allow 対象外ツールを検出してログ記録）+ ループ検出 |
 | `PreToolUse` (Write/Edit) | ファイル書き込み前 | TDDガード（テスト未実行なら実装ファイル書き込みブロック） |
-| `Stop` | Claude応答完了後 | Agentステータス表示(`background_tasks`の有無を機械的に表示) → 承認ログ付き改善チェック強制（exit 2 でブロック）→ 完了通知 |
+| `Stop` | Claude応答完了後 | 他Agent作業中チェック(`background_tasks`が空でなければ exit 2 でブロックして表示。**Stop では stdout への平文出力はユーザーに表示されない**ため exit 2+stderr が唯一確認済みの可視化手段) → 承認ログ付き改善チェック強制（exit 2 でブロック）→ 完了通知 |
 
 ---
 
