@@ -15,19 +15,25 @@ Claude Code の個人設定・エージェント・スキル・フックの管�
 │   ├── developer.md
 │   ├── po.md
 │   ├── da-reviewer.md
-│   └── tdd-pr-workflow.md
+│   ├── tdd-pr-workflow.md
+│   └── dod-*.md        # DoD項目ごとの自動生成レビューAgent（後述「DoD Factory」）
 ├── skills/             # ユーザー起動スキル（agents/ を参照する薄いラッパー）
 │   ├── architect/
 │   ├── developer/
 │   ├── po/
 │   ├── da-review/
-│   └── writing-code/
-├── scripts/            # フック用シェルスクリプト
+│   ├── writing-code/
+│   └── dod-*/          # DoD項目ごとの自動生成Skill（後述「DoD Factory」）
+├── dod/
+│   └── deliverables-dod.json  # DoD項目の正本（id/title/check）。Skill/Agentはここから生成される
+├── scripts/            # フック用シェルスクリプト・DoD Factory生成器
 │   ├── pre-task-estimate.sh   # UserPromptSubmit: 難易度推定
 │   ├── loop-detection.sh      # PreToolUse: ループ検出
 │   ├── tdd-guard.sh           # PreToolUse: TDD強制
 │   ├── post-task-analysis.sh  # Stop: セッション分析
-│   └── notify.sh              # 完了通知
+│   ├── notify.sh               # 完了通知
+│   ├── sync-dod-skills.py      # dod/deliverables-dod.json → skills/dod-*/, agents/dod-*.md を生成
+│   └── test_sync_dod_skills.py # 上記のテスト
 └── external/           # 外部ツール（git submodule）
     ├── claude-statusline/      # ステータスライン表示
     └── claude-code-monitoring-guide/  # OTel監視スタック
@@ -104,6 +110,54 @@ Claude が作業開始
        ↓
 5. PR 作成
 ```
+
+---
+
+## DoD Factory（成果物のDoD項目ごとにSkill/Agentを自動生成する）
+
+このリポジトリ自体が「DoD項目の数だけレビューAgent/Skillを作る工場」として動く。正本は `dod/deliverables-dod.json` で、ここに書かれたDoD項目1件につき、生成器が **Skill 1つ + Agent 1つ** を機械的に材料化する。項目を増やせば増え、減らせば消える。
+
+```
+dod/deliverables-dod.json  (id/title/check の配列。正本)
+        │
+        ▼  python3 scripts/sync-dod-skills.py
+        │
+        ├─→ skills/dod-<id>/SKILL.md   (軽量: 成果物を書く/直す作業中にコンテキストへ読み込む観点)
+        └─→ agents/dod-<id>.md         (重量: Task ツールで個別起動する独立レビュワー)
+```
+
+Skill と Agent は役割が違う。Skill はこれから書く・直す成果物に観点を思い出させるための軽い参照。Agent は書き終えた成果物を**独立したコンテキストで**判定させるためのサブエージェントで、`Task` ツールに `subagent_type: "dod-<id>"` を渡すと起動できる。例えば記事を書き終えたら、現在の5項目それぞれに対応する `dod-ambiguous-acronym-confirm` / `dod-adr-structure` / `dod-rubric-completeness` / `dod-no-edit-timeline-narration` / `dod-source-accuracy` を並列で起動し、各々からPASS/FAILと具体的な指摘を受け取る、という使い方をする。
+
+### DoD項目を増やす/減らす手順
+
+1. `dod/deliverables-dod.json` の `items` 配列を編集する(`{"id": "...", "title": "...", "check": "..."}` を追加・削除)。
+2. `uv run --with pytest pytest scripts/test_sync_dod_skills.py` でテストが通ることを確認する(先にテストを直すべき変更ならTDDに従う)。
+3. `python3 scripts/sync-dod-skills.py` を実行する。出力に `Skills written` と `Agents written` の件数がJSONの項目数と一致していることを確認する(一致しなければ非0終了する)。
+4. `git add` → commit → push。このリポジトリをチェックアウトしている側(例: このdotfiles自体)は `chezmoi apply` で反映する。
+
+### 他プロジェクトからSkillだけを取り込む(apm経由の横断配布)
+
+Skillは [microsoft/apm](https://github.com/microsoft/apm) で配布可能な形になっている。消費側リポジトリの `apm.yml` に以下のように書いて `apm install` すると、必要な項目だけ `.claude/skills/dod-<id>/` に配置される(実例: `makinzm/qiita-dir` の `apm.yml`)。
+
+```yaml
+dependencies:
+  apm:
+    - git: makinzm/dot-claude
+      ref: <commit-or-tag>   # pin推奨。省略するとapmが "unpinned" 警告を出す
+      skills:
+        - dod-adr-structure
+        - dod-ambiguous-acronym-confirm
+        - dod-no-edit-timeline-narration
+        - dod-rubric-completeness
+        - dod-source-accuracy
+```
+
+Agent(`agents/dod-*.md`)は現時点では**この横断配布の対象外**。apmのAgent探索は「パッケージルート直下の `*.agent.md`」または「`.apm/agents/` 配下」しか見ず、このリポジトリの既存レイアウト(`agents/<name>.md`)とは一致しないため、他プロジェクトから `apm install` で取り込むことはできない(実機のapmソースコードを読んで確認した制約で、未実装)。Agentは今のところこのマシン上(`~/.claude/agents/`)でのみ使う。
+
+### レイアウト上の既知の落とし穴(実機で踏んだ地雷)
+
+- Skillは `skills/<name>/SKILL.md` という1階層フラットな配置が必須。`skills/dod/<id>/SKILL.md` のように余分な `dod/` 名前空間フォルダでネストすると、`git:` 依存のみ(pathなし)でのapm一括スキャンが見つけられず `apm install` が `Not a valid APM package` で失敗する。
+- 同様にAgentも `agents/<name>.md` のフラット配置。
 
 ---
 
