@@ -418,13 +418,13 @@ allow リストへ項目を追加する前に、ユーザーへ以下を **必�
 
 ## 成果物のDoD (Definition of Done)
 
-コードに限らず、記事・ドキュメント・設計案・PRなど、すべての成果物に共通して課す完了条件。**正本(source of truth)はこの節の文章ではなく `~/.claude/dod/deliverables-dod.json` である。** この節はその人間向けミラーに過ぎない。DoD項目ごとに検証責任を分離し、1項目=1 Skillとして機械的に材料化する、という構成そのものがこのdotfiles(=ソフトウェアファクトリ)の動作原理である。
+コードに限らず、記事・ドキュメント・設計案・PRなど、すべての成果物に共通して課す完了条件。**正本(source of truth)はこの節の文章ではなく `~/.claude/dod/deliverables-dod.json` である。** この節はその人間向けミラーに過ぎない。DoD項目ごとに検証責任を分離し、1項目=1 Skill **かつ** 1 Agentとして機械的に材料化する、という構成そのものがこのdotfiles(=ソフトウェアファクトリ)の動作原理である。Skillは軽量なコンテキスト注入(レビュー観点を読み込む)、Agentは`Task`ツールで個別に起動できる独立したレビュワー(Task-tool subagent)であり、役割が異なる。
 
 ### 実装(プロンプトに書くだけでは終わらせない)
 
 - `~/.claude/dod/deliverables-dod.json`: DoD項目をid/title/checkの構造化データとして持つ。項目の追加・削除はこのJSONを編集することで行う。
-- `~/.claude/scripts/sync-dod-skills.py`: 上記JSONを読み、`~/.claude/skills/dod-<id>/SKILL.md` をDoD項目の数だけ生成する(他の既存Skillと同じ `skills/<name>/SKILL.md` の深さに `dod-` 接頭辞で並べる。apmの一括スキャンは `skills/` の1階層しか見ないため、サブフォルダにネストすると見つからなくなる)。JSONから削除された項目のSkillディレクトリは自動的に削除される(= `dod-*` のSkill数は常にDoD項目の数と一致する)。JSON編集後は必ず `python3 ~/.claude/scripts/sync-dod-skills.py` を実行する。テストは `~/.claude/scripts/test_sync_dod_skills.py`(`uv run --with pytest pytest` で実行)。
-- 生成された `skills/dod-*/` は、このリポジトリ(`makinzm/dot-claude`)自体が**配布可能なapmパッケージ**であることの一部になる。他プロジェクトは自分の `apm.yml` で `apm install makinzm/dot-claude --skill dod-<id>` のように個別のDoD Skillだけを取り込める。dotfiles(このリポジトリ)が「DoD項目の数だけAgent/Skillを作る工場」であり、各プロジェクトリポジトリはそこから必要な分だけ取り込む消費者という位置づけになる。
+- `~/.claude/scripts/sync-dod-skills.py`: 上記JSONを読み、`~/.claude/skills/dod-<id>/SKILL.md` と `~/.claude/agents/dod-<id>.md` をDoD項目の数だけ生成する。Skillは他の既存Skillと同じ `skills/<name>/SKILL.md` の深さに `dod-` 接頭辞で並べる(apmの一括スキャンは `skills/` の1階層しか見ないため、サブフォルダにネストすると見つからなくなる)。Agentは他の既存Agentと同じ `agents/<name>.md` の深さに `dod-` 接頭辞で並べる(`Task`ツールの `subagent_type: dod-<id>` で個別に起動できる)。JSONから削除された項目のSkillディレクトリ・Agentファイルは自動的に削除される(= `dod-*` のSkill数・Agent数は常にDoD項目の数と一致する)。JSON編集後は必ず `python3 ~/.claude/scripts/sync-dod-skills.py` を実行する。テストは `~/.claude/scripts/test_sync_dod_skills.py`(`uv run --with pytest pytest` で実行)。
+- 生成された `skills/dod-*/` は、このリポジトリ(`makinzm/dot-claude`)自体が**配布可能なapmパッケージ**であることの一部になる。他プロジェクトは自分の `apm.yml` で `apm install makinzm/dot-claude --skill dod-<id>` のように個別のDoD Skillだけを取り込める。`agents/dod-*.md` はapmのAgent探索規約(パッケージルート直下の `*.agent.md` または `.apm/agents/` 配下)に一致しないため現時点では横断配布の対象外であり、このマシン上(chezmoi経由で`~/.claude/agents/`に反映)でのみ利用する。dotfiles(このリポジトリ)が「DoD項目の数だけAgent/Skillを作る工場」であり、各プロジェクトリポジトリはそこから必要な分だけ取り込む消費者という位置づけになる。
 
 ### 現在のDoD項目(人間向けミラー。編集は上記JSONに対して行う)
 

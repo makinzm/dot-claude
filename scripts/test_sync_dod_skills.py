@@ -69,6 +69,63 @@ def test_sync_removes_skills_no_longer_in_items(tmp_path):
     assert (skills_root / "unrelated-skill").is_dir()
 
 
+def test_sync_agents_creates_one_agent_file_per_item(tmp_path):
+    # Review Agents (Task-tool subagents), not just Skills, must scale
+    # 1:1 with DoD items -- this is the article's core thesis made real.
+    # They live flat as agents/dod-<id>.md, matching every other
+    # hand-written agent in this repo (agents/<name>.md).
+    mod = _load_module()
+    items = [
+        {"id": "a", "title": "A", "check": "check a"},
+        {"id": "b", "title": "B", "check": "check b"},
+    ]
+    agents_root = tmp_path / "agents"
+    agents_root.mkdir()
+    (agents_root / "unrelated-agent.md").write_text("unrelated", encoding="utf-8")
+
+    written, removed = mod.sync_agents(items, agents_root)
+
+    assert sorted(written) == ["a", "b"]
+    assert removed == []
+    dod_files = sorted(
+        p.name for p in agents_root.iterdir() if p.name.startswith("dod-")
+    )
+    assert dod_files == ["dod-a.md", "dod-b.md"]
+    assert (agents_root / "unrelated-agent.md").read_text(
+        encoding="utf-8"
+    ) == "unrelated"
+    content = (agents_root / "dod-a.md").read_text(encoding="utf-8")
+    assert "name: dod-a" in content
+    assert "check a" in content
+
+
+def test_sync_agents_removes_agent_files_no_longer_in_items(tmp_path):
+    mod = _load_module()
+    agents_root = tmp_path / "agents"
+    agents_root.mkdir()
+    (agents_root / "unrelated-agent.md").write_text("unrelated", encoding="utf-8")
+    mod.sync_agents(
+        [
+            {"id": "a", "title": "A", "check": "check a"},
+            {"id": "b", "title": "B", "check": "check b"},
+        ],
+        agents_root,
+    )
+
+    written, removed = mod.sync_agents(
+        [{"id": "a", "title": "A", "check": "check a"}],
+        agents_root,
+    )
+
+    assert written == ["a"]
+    assert removed == ["b"]
+    dod_files = sorted(
+        p.name for p in agents_root.iterdir() if p.name.startswith("dod-")
+    )
+    assert dod_files == ["dod-a.md"]
+    assert (agents_root / "unrelated-agent.md").is_file()
+
+
 def test_load_items_reads_json(tmp_path):
     mod = _load_module()
     dod_json = tmp_path / "deliverables-dod.json"
