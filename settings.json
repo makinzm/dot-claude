@@ -20,6 +20,7 @@
       "Bash(curl * 127.0.0.1*)",
       "Bash(curl * localhost*)",
       "Bash(curl * api.github.com*)",
+      "Bash(rsync -a --exclude .venv --exclude .git * /private/tmp/claude-501/*)",
       "Bash(lsof -nP -iTCP* -sTCP:LISTEN*)",
       "Bash(lsof *)",
       "Bash(pgrep *)",
