@@ -226,6 +226,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash ~/.claude/scripts/agent-status-notify.sh"
+          },
+          {
+            "type": "command",
             "command": "bash ~/.claude/scripts/stop-improvement-check.sh"
           },
           {
