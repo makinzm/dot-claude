@@ -418,7 +418,15 @@ allow リストへ項目を追加する前に、ユーザーへ以下を **必�
 
 ## 成果物のDoD (Definition of Done)
 
-コードに限らず、記事・ドキュメント・設計案・PRなど、すべての成果物に共通して課す完了条件。DoD項目ごとに検証責任を分離し、レビューAgent(`da-reviewer` 等)やプロジェクト固有のSkillに割り当てる。各項目は過去の指摘から得た教訓であり、同じ指摘を繰り返さないための固定チェックリストとして扱う。
+コードに限らず、記事・ドキュメント・設計案・PRなど、すべての成果物に共通して課す完了条件。**正本(source of truth)はこの節の文章ではなく `~/.claude/dod/deliverables-dod.json` である。** この節はその人間向けミラーに過ぎない。DoD項目ごとに検証責任を分離し、1項目=1 Skillとして機械的に材料化する、という構成そのものがこのdotfiles(=ソフトウェアファクトリ)の動作原理である。
+
+### 実装(プロンプトに書くだけでは終わらせない)
+
+- `~/.claude/dod/deliverables-dod.json`: DoD項目をid/title/checkの構造化データとして持つ。項目の追加・削除はこのJSONを編集することで行う。
+- `~/.claude/scripts/sync-dod-skills.py`: 上記JSONを読み、`~/.claude/skills/dod/<id>/SKILL.md` をDoD項目の数だけ生成する。JSONから削除された項目のSkillディレクトリは自動的に削除される(= Skillの数は常にDoD項目の数と一致する)。JSON編集後は必ず `python3 ~/.claude/scripts/sync-dod-skills.py` を実行する。テストは `~/.claude/scripts/test_sync_dod_skills.py`(`uv run --with pytest pytest` で実行)。
+- `~/.claude/skills/dod/`: 生成されたSkill群。このディレクトリ自体が**配布可能なapmパッケージ**であり、他プロジェクトは自分の `apm.yml` に `git: makinzm/dot-claude` + `path: skills/dod` を依存として宣言し、`apm install` で必要なDoD Skillだけ(`--skill <id>` で個別選択可)を取り込める。dotfiles(このリポジトリ)が「DoD項目の数だけAgent/Skillを作る工場」であり、各プロジェクトリポジトリはそこから必要な分だけ取り込む消費者という位置づけになる。
+
+### 現在のDoD項目(人間向けミラー。編集は上記JSONに対して行う)
 
 1. **多義的な略語・用語は使う前に確認する**: 依頼文中の略語(APM, CI, SLA等)が業界で複数の意味を持ちうる場合、それを軸に成果物を大きく書き進める前にユーザーへ確認する。確認せず一つの解釈で書き進めて後から訂正を受けると手戻りが大きい。
 2. **設計上の決定はADR型式で書く**: 「こう設計するのが良い」という提案を書く箇所は、思いついた順の補足節を積むのではなく、Title/Status/Context/Decision Criteria/Options Considered/Decision/Consequencesの型式で構成する(`adr` skill参照)。関連ツール・先行事例は「どのOptionのどのサブ決定に対する回答か」を決めてから書き、独立した浮いた節にしない。判断軸(Decision Criteria)はOptions Consideredより先に固定し、選択肢を見てから軸を作る(HARKing)を避ける。
@@ -429,4 +437,4 @@ allow リストへ項目を追加する前に、ユーザーへ以下を **必�
 ### 運用
 
 - 新しいプロジェクトで成果物を作るときは、上記の共通DoDに加えて、そのプロジェクト固有のDoD項目(例: 記事なら「出典は実際に読んだURLのみ使う」)を追加してよい。
-- プロジェクト固有のDoD項目は、そのプロジェクトの `.claude/` やSkill(Agent Package Manager等で配布できる形)に落とし込み、DoD項目ごとにレビューAgent/Skillを用意する発想を優先する(「何でも1つのレビューAgentに担わせる」設計を避ける)。
+- プロジェクト固有のDoD項目は、そのプロジェクトの `.claude/` やSkill(自前で作るか、`apm.yml` で `makinzm/dot-claude` の `skills/dod` から必要な項目だけ取り込むか)に落とし込み、DoD項目ごとにレビューAgent/Skillを用意する発想を優先する(「何でも1つのレビューAgentに担わせる」設計を避ける)。

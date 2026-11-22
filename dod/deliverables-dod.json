@@ -1,0 +1,29 @@
+{
+  "items": [
+    {
+      "id": "ambiguous-acronym-confirm",
+      "title": "多義的な略語・用語の確認",
+      "check": "依頼文中の略語(APM, CI, SLA等)が業界で複数の意味を持ちうる場合、それを軸に成果物を大きく書き進める前にユーザーへ確認したか。確認せず一つの解釈で書き進めていないか。"
+    },
+    {
+      "id": "adr-structure",
+      "title": "設計上の決定はADR型式",
+      "check": "「こう設計するのが良い」という提案を書く箇所が、Title/Status/Context/Decision Criteria/Options Considered/Decision/Consequencesの型式で構成されているか。判断軸(Decision Criteria)は選択肢より先に固定されているか。関連ツール・先行事例は、どのOptionのどのサブ決定への回答かを明示し、独立した浮いた節になっていないか。"
+    },
+    {
+      "id": "rubric-completeness",
+      "title": "採点基準・チェックリストの網羅性",
+      "check": "採点基準・チェックリストを設計するとき、依頼文中の具体的なシナリオ(「〇〇ごとに違う」「〇〇の場合は」等)を一つずつ軸・項目として洗い出せているか。既存項目の説明文に埋め込んで済ませていないか。"
+    },
+    {
+      "id": "no-edit-timeline-narration",
+      "title": "成果物本文に編集履歴を書かない",
+      "check": "「ここは後から追加した」「ユーザー指定の」のような、文書が出来上がった時系列のナレーションが成果物本文に残っていないか。編集の経緯はtasks/配下のTODO.md・timeline.mdやPR descriptionに書かれているか。"
+    },
+    {
+      "id": "source-accuracy",
+      "title": "出典の正確性",
+      "check": "脚注・参考文献が実際に読んだURLか。自己申告の数値(star数・性能数値等)は「未検証」と明記されているか。"
+    }
+  ]
+}

@@ -24,6 +24,10 @@ ide/
 # プラグイン（バイナリや環境依存の可能性）
 plugins/
 
+# Pythonキャッシュ
+__pycache__/
+.pytest_cache/
+
 # プロジェクトとタスク管理
 projects/
 tasks/
