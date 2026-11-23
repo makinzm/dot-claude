@@ -29,11 +29,13 @@ if [ -z "$transcript_path" ] || [ ! -f "$transcript_path" ]; then
 fi
 
 # Deliverable files = .md files written/edited this session, excluding
-# this factory's own infra paths (agent/skill/DoD-definition plumbing and
-# session scratch dirs), which are governed by separate existing checks.
+# this factory's own infra paths (agent/skill/DoD-definition plumbing,
+# session scratch dirs, and the Stop-hook improvement marker file written
+# by stop-improvement-check.sh), which are governed by separate existing
+# checks.
 deliverable_files=$(grep -oE '"name":"(Write|Edit)","input":\{"file_path":"[^"]*\.md"' "$transcript_path" 2>/dev/null \
     | sed -E 's/.*"file_path":"([^"]*)"/\1/' \
-    | grep -v -E '/\.claude/|/chezmoi/dot_claude/|/tasks/|/dod/' \
+    | grep -v -E '/\.claude/|/chezmoi/dot_claude/|/tasks/|/dod/|^/tmp/claude-improvements-' \
     | sort -u || true)
 
 if [ -z "$deliverable_files" ]; then
