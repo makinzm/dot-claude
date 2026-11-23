@@ -20,13 +20,20 @@
 # model's own text). `stop_hook_active` guards against re-notifying/
 # re-blocking forever on the same still-pending background task within one
 # stop attempt.
+#
+# `teammate`-type entries are excluded from the "still working" check:
+# teammates are persistent/addressable sessions, not ephemeral jobs that
+# finish and disappear -- and `status` for this type has been observed
+# (twice, same session) reporting "running" for a teammate `ListAgents`
+# confirmed was actually `idle`. Treating a permanently-present, unreliably
+# -labelled entry as "pending work" would make this hook block forever.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 input=$(cat)
 stop_hook_active=$(echo "$input" | jq -r '.stop_hook_active // false' 2>/dev/null || echo false)
-tasks_json=$(echo "$input" | jq -c '(.background_tasks // [])' 2>/dev/null || echo '[]')
+tasks_json=$(echo "$input" | jq -c '(.background_tasks // []) | map(select(.type != "teammate"))' 2>/dev/null || echo '[]')
 count=$(echo "$tasks_json" | jq 'length' 2>/dev/null || echo 0)
 
 if [ "$count" -gt 0 ] && [ "$stop_hook_active" != "true" ]; then
