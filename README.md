@@ -130,6 +130,8 @@ dod/deliverables-dod.json  (id/title/check の配列。正本)
 
 Skill と Agent は役割が違う。Skill はこれから書く・直す成果物に観点を思い出させるための軽い参照。Agent は書き終えた成果物を**独立したコンテキストで**判定させるためのサブエージェントで、`Task` ツールに `subagent_type: "dod-<id>"` を渡すと起動できる。例えば記事を書き終えたら、現在の7項目それぞれに対応する `dod-ambiguous-acronym-confirm` / `dod-adr-structure` / `dod-rubric-completeness` / `dod-no-edit-timeline-narration` / `dod-source-accuracy` / `dod-primary-source-verification` / `dod-score-anchor-consistency` を並列で起動し、各々からPASS/FAILと具体的な指摘を受け取る、という使い方をする。
 
+**Agentの起動は「書いてあるから実行される」ではなく機械的に強制される**: `scripts/executable_dod-review-check.sh`(`Stop` hook)が、そのセッションで `.md` 成果物(このリポジトリ自身のインフラ用パスを除く)を書き込んだのに、現存する `dod-*` Agentの一部が一度もそのセッション内で起動されていなければ応答の完了を `exit 2` でブロックする。これにより「1項目=1 Skill+1 Agentを材料化する」ことと「実際にすべての成果物がそれらでレビューされる」ことの間のギャップ(材料があるだけで使われるとは限らない)を塞いでいる。
+
 ### DoD項目を増やす/減らす手順
 
 1. `dod/deliverables-dod.json` の `items` 配列を編集する(`{"id": "...", "title": "...", "check": "..."}` を追加・削除)。
