@@ -129,7 +129,10 @@ fi
 # Build approval section from log
 approval_section=""
 if [ -f "$approval_log" ] && [ -s "$approval_log" ]; then
-    approval_count=$(wc -l < "$approval_log" | tr -d ' ')
+    # Each approval is one "HH:MM:SS | ..." entry, but a multi-line (e.g.
+    # heredoc) command spans several physical lines, so counting with
+    # `wc -l` overcounts; count entry headers instead.
+    approval_count=$(grep -cE '^[0-9]{2}:[0-9]{2}:[0-9]{2} \| ' "$approval_log" | tr -d ' ')
     approval_section="
 ━━ 承認が必要だったツール (${approval_count}件) ━━
 $(cat "$approval_log")
