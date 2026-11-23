@@ -126,7 +126,7 @@ dod/deliverables-dod.json  (id/title/check の配列。正本)
         └─→ agents/dod-<id>.md         (重量: Task ツールで個別起動する独立レビュワー)
 ```
 
-Skill と Agent は役割が違う。Skill はこれから書く・直す成果物に観点を思い出させるための軽い参照。Agent は書き終えた成果物を**独立したコンテキストで**判定させるためのサブエージェントで、`Task` ツールに `subagent_type: "dod-<id>"` を渡すと起動できる。例えば記事を書き終えたら、現在の5項目それぞれに対応する `dod-ambiguous-acronym-confirm` / `dod-adr-structure` / `dod-rubric-completeness` / `dod-no-edit-timeline-narration` / `dod-source-accuracy` を並列で起動し、各々からPASS/FAILと具体的な指摘を受け取る、という使い方をする。
+Skill と Agent は役割が違う。Skill はこれから書く・直す成果物に観点を思い出させるための軽い参照。Agent は書き終えた成果物を**独立したコンテキストで**判定させるためのサブエージェントで、`Task` ツールに `subagent_type: "dod-<id>"` を渡すと起動できる。例えば記事を書き終えたら、現在の7項目それぞれに対応する `dod-ambiguous-acronym-confirm` / `dod-adr-structure` / `dod-rubric-completeness` / `dod-no-edit-timeline-narration` / `dod-source-accuracy` / `dod-primary-source-verification` / `dod-score-anchor-consistency` を並列で起動し、各々からPASS/FAILと具体的な指摘を受け取る、という使い方をする。
 
 ### DoD項目を増やす/減らす手順
 
