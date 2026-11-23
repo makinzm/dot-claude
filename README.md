@@ -158,6 +158,10 @@ dependencies:
 
 Agent(`agents/dod-*.md`)は現時点では**この横断配布の対象外**。apmのAgent探索は「パッケージルート直下の `*.agent.md`」または「`.apm/agents/` 配下」しか見ず、このリポジトリの既存レイアウト(`agents/<name>.md`)とは一致しないため、他プロジェクトから `apm install` で取り込むことはできない(実機のapmソースコードを読んで確認した制約で、未実装)。Agentは今のところこのマシン上(`~/.claude/agents/`)でのみ使う。
 
+### 新規プロジェクトをこの運用で始める
+
+新しいプロジェクトを「このDoD駆動運用がすでに効いた状態」でブートストラップしたい場合は `factory-init` スキル(`skills/factory-init/SKILL.md`)を使う。BACKLOG.md作成・`apm.yml`雛形・`apm install`・READMEへの運用方式の一言、をまとめて行う。会社・他組織が持つ別のDoDをこのプロジェクトに取り込みたい場合の手順(apm経由で並べて取り込む/組織側にも同じ生成器パターンを新設してもらう/プロジェクト限定で済ませる、の3パターン)もそのスキル内に書いてある。
+
 ### レイアウト上の既知の落とし穴(実機で踏んだ地雷)
 
 - Skillは `skills/<name>/SKILL.md` という1階層フラットな配置が必須。`skills/dod/<id>/SKILL.md` のように余分な `dod/` 名前空間フォルダでネストすると、`git:` 依存のみ(pathなし)でのapm一括スキャンが見つけられず `apm install` が `Not a valid APM package` で失敗する。
