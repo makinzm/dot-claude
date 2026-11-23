@@ -231,6 +231,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash ~/.claude/scripts/stop-status-marker-check.sh"
+          },
+          {
+            "type": "command",
             "command": "bash ~/.claude/scripts/agent-status-notify.sh"
           },
           {

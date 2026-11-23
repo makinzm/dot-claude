@@ -70,6 +70,27 @@
 
 ---
 
+## 状態マーカーの明示
+
+Claude の最終応答だけでは「作業が終わったのか進行中なのか」が読み手に伝わりにくい、という指摘を複数セッションにわたって繰り返し受けた。Rule（本節に書くだけ）では徹底されなかったため、[改善の優先順位](#改善の優先順位) に従い Hook で機械的に強制する。
+
+### マーカー形式
+
+**毎ターンの最終応答**は、他の内容より前に以下4種類のいずれかを明示する:
+
+- `状態: ✅完了` — このターンでユーザーの依頼に対応しきった。後続作業はない。
+- `状態: 🔄進行中` — 作業は継続中（バックグラウンドAgent実行中、複数ステップの途中など）。
+- `状態: ⏸️確認待ち` — ユーザーの判断・承認を待っている（質問・選択肢提示など）。
+- `状態: ❌失敗` — エラー・ブロックで完了できなかった。
+
+一言だけの応答やトリビアルな返答にも例外はなく、毎回つける。
+
+### 強制方法
+
+`Stop` フック (`scripts/executable_stop-status-marker-check.sh`) が最終応答のテキストから `^状態: ` で始まる行を検出する。無ければ exit 2 でブロックし、マーカー行を追加してから終了するよう要求する。他の `Stop` フック（他Agent作業中チェック・改善チェック・完了通知）より先に実行する。
+
+---
+
 ## 承認・コンテキスト削減の原則
 
 タスク実行中は常に **「この承認は次回なくせるか？」** を考える。
@@ -371,7 +392,7 @@ allow リストへ項目を追加する前に、ユーザーへ以下を **必�
 | `UserPromptSubmit` | ユーザー入力時 | 難易度推定(S/M/L/XL)、L/XL時は状態ファイル作成 |
 | `PreToolUse` (全) | ツール実行前 | 承認音（allow 対象外ツールを検出してログ記録）+ ループ検出 |
 | `PreToolUse` (Write/Edit) | ファイル書き込み前 | TDDガード（テスト未実行なら実装ファイル書き込みブロック） |
-| `Stop` | Claude応答完了後 | 他Agent作業中チェック(`background_tasks`が空でなければ exit 2 でブロックして表示。**Stop では stdout への平文出力はユーザーに表示されない**ため exit 2+stderr が唯一確認済みの可視化手段) → 承認ログ付き改善チェック強制（exit 2 でブロック）→ 完了通知 |
+| `Stop` | Claude応答完了後 | 状態マーカー強制（[状態マーカーの明示](#状態マーカーの明示)、exit 2 でブロック）→ 他Agent作業中チェック(`background_tasks`が空でなければ exit 2 でブロックして表示。**Stop では stdout への平文出力はユーザーに表示されない**ため exit 2+stderr が唯一確認済みの可視化手段) → 承認ログ付き改善チェック強制（exit 2 でブロック）→ 完了通知 |
 
 ---
 
@@ -426,6 +447,7 @@ allow リストへ項目を追加する前に、ユーザーへ以下を **必�
 
 - `~/.claude/dod/deliverables-dod.json`: DoD項目をid/title/checkの構造化データとして持つ。項目の追加・削除はこのJSONを編集することで行う。
 - `~/.claude/scripts/sync-dod-skills.py`: 上記JSONを読み、`~/.claude/skills/dod-<id>/SKILL.md` と `~/.claude/agents/dod-<id>.md` をDoD項目の数だけ生成する。Skillは他の既存Skillと同じ `skills/<name>/SKILL.md` の深さに `dod-` 接頭辞で並べる(apmの一括スキャンは `skills/` の1階層しか見ないため、サブフォルダにネストすると見つからなくなる)。Agentは他の既存Agentと同じ `agents/<name>.md` の深さに `dod-` 接頭辞で並べる(`Task`ツールの `subagent_type: dod-<id>` で個別に起動できる)。JSONから削除された項目のSkillディレクトリ・Agentファイルは自動的に削除される(= `dod-*` のSkill数・Agent数は常にDoD項目の数と一致する)。JSON編集後は必ず `python3 ~/.claude/scripts/sync-dod-skills.py` を実行する。テストは `~/.claude/scripts/test_sync_dod_skills.py`(`uv run --with pytest pytest` で実行)。
+- **1:1 不変条件はRuleだけに頼らず、pre-commit hookでも強制する**: `dot_git-hooks/executable_pre-commit`(グローバル `core.hooksPath` 経由で全リポジトリの `git commit` に適用)が、staged diffに `dod/` / `skills/dod-*` / `agents/dod-*` が含まれる場合に限り `sync-dod-skills.py` を自動実行し、再生成結果とstaged内容の差分(未staged・untrackedな `dod-*` パス)があればcommitを `exit 1` でブロックする。「JSON編集後にsyncスクリプトを手で実行し忘れる」というヒューマンエラーを、Claudeか人間かを問わず機械的に防ぐ層であり、[改善の優先順位](#改善の優先順位) でHookを最上位に置く理由そのものの実例。
 - 生成された `skills/dod-*/` は、このリポジトリ(`makinzm/dot-claude`)自体が**配布可能なapmパッケージ**であることの一部になる。他プロジェクトは自分の `apm.yml` で `apm install makinzm/dot-claude --skill dod-<id>` のように個別のDoD Skillだけを取り込める。`agents/dod-*.md` はapmのAgent探索規約(パッケージルート直下の `*.agent.md` または `.apm/agents/` 配下)に一致しないため現時点では横断配布の対象外であり、このマシン上(chezmoi経由で`~/.claude/agents/`に反映)でのみ利用する。dotfiles(このリポジトリ)が「DoD項目の数だけAgent/Skillを作る工場」であり、各プロジェクトリポジトリはそこから必要な分だけ取り込む消費者という位置づけになる。
 
 ### 現在のDoD項目(人間向けミラー。編集は上記JSONに対して行う)
