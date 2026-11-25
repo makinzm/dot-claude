@@ -46,7 +46,11 @@ if ! echo "$file_path" | grep -qiE '\.(rs|py|ts|tsx|js|jsx|go|java|kt|swift|rb|c
 fi
 
 # Skip test files themselves — TDD requires writing tests first, not blocking them
-if echo "$file_path" | grep -qiE '(_test\.|\.test\.|_spec\.|\.spec\.|/tests/|/test/|/__tests__/|^test_)'; then
+# `^test_` only matched a bare relative filename; Write/Edit always get an
+# absolute path (e.g. /Users/.../scripts/test_sync_dod_skills.py), which
+# never starts with "test_", so this exclusion silently never fired for
+# that naming style. Anchor on the basename instead via `(^|/)test_`.
+if echo "$file_path" | grep -qiE '(_test\.|\.test\.|_spec\.|\.spec\.|/tests/|/test/|/__tests__/|(^|/)test_)'; then
     exit 0
 fi
 
